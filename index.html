@@ -6,7 +6,7 @@
 <title>璨 · 鑽石行星</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Noto+Serif+TC:wght@300;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Noto+Serif+TC:wght@300;500;700&family=Noto+Serif+JP:wght@300;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#eef3ff; --dim:rgba(220,230,255,.55); --faint:rgba(220,230,255,.28);
@@ -28,9 +28,14 @@
   .brand svg{width:26px;height:26px}
   .brand b{color:var(--ink);font-weight:500}
 
-  .tag{position:absolute;top:30px;right:32px;font-size:12px;letter-spacing:.2em;color:var(--faint);text-align:right;line-height:1.9}
+  html[lang="ja"] body{font-family:"Noto Serif JP","Cormorant Garamond",serif}
+  .lang{position:absolute;top:24px;right:32px;font:inherit;font-size:12px;letter-spacing:.16em;color:var(--ink);
+    background:rgba(255,255,255,.04);border:1px solid rgba(220,235,255,.28);border-radius:999px;padding:7px 14px;cursor:pointer;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .3s ease}
+  .lang:hover{border-color:var(--ice)}
+  .tag{position:absolute;top:70px;right:32px;font-size:12px;letter-spacing:.2em;color:var(--faint);text-align:right;line-height:1.9}
 
-  .hero{position:absolute;left:clamp(24px,6vw,96px);top:50%;transform:translateY(-50%);max-width:420px;pointer-events:none}
+  .hero{position:absolute;left:clamp(24px,6vw,96px);top:50%;transform:translateY(-50%);max-width:360px;pointer-events:none}
   .hero .kicker{font-family:"Cormorant Garamond",serif;font-size:13px;letter-spacing:.42em;color:var(--dim);margin-bottom:18px;display:flex;align-items:center;gap:12px}
   .hero .kicker::before{content:"";width:34px;height:1px;background:var(--faint)}
   .hero h1{font-weight:300;font-size:clamp(64px,10vw,124px);line-height:1;letter-spacing:.06em;
@@ -66,6 +71,7 @@
   @media (max-width:760px){
     .brand{top:20px;left:20px}
     .tag{display:none}
+    .lang{top:16px;right:18px}
     .hero{top:15%;transform:none;left:22px;right:22px}
     .hero h1{font-size:72px}
     .hero .en{font-size:18px;margin:8px 0 14px}
@@ -89,7 +95,7 @@
 </head>
 <body>
 <div id="stage"></div>
-<div id="loader">正在對焦</div>
+<div id="loader" data-i18n="loader">正在對焦</div>
 
 <div class="ui" id="ui">
   <div class="brand">
@@ -99,28 +105,29 @@
     </svg>
     <div><b>CHAN</b> · 璨</div>
   </div>
-  <div class="tag">星球聯動<br>KIRAKIRA CLASS · 鑽石行星</div>
+  <button class="lang" id="lang">日本語</button>
+  <div class="tag" data-i18n="tag">星球聯動<br>KIRAKIRA CLASS · 鑽石行星</div>
 
   <div class="hero">
     <div class="kicker">A DIAMOND WORLD</div>
     <h1>璨</h1>
     <div class="en">He knows he is beautiful.</div>
     <p class="quote" id="quote">「別一直盯著瞧呀，知道我長得好看，但眼睛要看花了！」<small>璨，對第一次靠近的探索船</small></p>
-    <p class="mhint">點星球、點冰晶環、連戳很多下、放著不管，他都會有反應</p>
+    <p class="mhint" data-i18n="mhint">點星球、點冰晶環、連戳很多下、放著不管，他都會有反應</p>
   </div>
 
   <div class="readout">
-    <div class="extra">折射率 <span>2.42</span><br>
-    自轉週期 <span id="spin">— —</span><br>
-    可居住指數 <span>他說了算</span></div>
-    目前心情 <span class="mood" id="mood">自我欣賞中</span>
+    <div class="extra"><span data-i18n="r1" style="color:inherit">折射率</span> <span>2.42</span><br>
+    <span data-i18n="r2" style="color:inherit">自轉週期</span> <span id="spin">— —</span><br>
+    <span data-i18n="r3" style="color:inherit">可居住指數</span> <span data-i18n="r3v">他說了算</span></div>
+    <span data-i18n="r4" style="color:inherit">目前心情</span> <span class="mood" id="mood">自我欣賞中</span>
   </div>
 
   <div class="controls">
-    <button class="poke" id="poke">戳他一下</button>
-    <button class="poke" id="compare">找別顆比較</button>
-    <button class="poke moon" id="night" title="深夜模式">夜</button>
-    <div class="hint"><span class="desk">點星球、點冰晶環、雙擊戳他、放著不管也有反應<br>拖曳旋轉　滾輪靠近　<kbd>H</kbd> 隱藏介面　<kbd>F</kbd> 全螢幕</span></div>
+    <button class="poke" id="poke" data-i18n="poke">戳他一下</button>
+    <button class="poke" id="compare" data-i18n="compare">找別顆比較</button>
+    <button class="poke moon" id="night" title="深夜模式" data-i18n="night">夜</button>
+    <div class="hint"><span class="desk" data-i18n="desk">點星球、點冰晶環、雙擊戳他、放著不管也有反應<br>拖曳旋轉　滾輪靠近　<kbd>H</kbd> 隱藏介面　<kbd>F</kbd> 全螢幕</span></div>
   </div>
 </div>
 
@@ -131,6 +138,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const isMobile = matchMedia('(pointer:coarse)').matches || innerWidth < 760;
@@ -434,6 +442,15 @@ addEventListener('pointermove', e => {
 const composer = new EffectComposer(renderer);
 composer.setPixelRatio(Q.dpr);
 composer.addPass(new RenderPass(scene, camera));
+// guard: a single NaN or blown-out pixel would otherwise bloom into a bright square
+composer.addPass(new ShaderPass({
+  uniforms: { tDiffuse: { value: null } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+  fragmentShader: `uniform sampler2D tDiffuse; varying vec2 vUv;
+    void main(){ vec4 c = texture2D(tDiffuse, vUv);
+      if (any(isnan(c)) || any(isinf(c))) c = vec4(0.0, 0.0, 0.0, 1.0);
+      gl_FragColor = vec4(min(c.rgb, vec3(4.0)), c.a); }`
+}));
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth * Q.bloomScale, innerHeight * Q.bloomScale), 0.5, 0.5, 0.88);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
@@ -464,7 +481,7 @@ rock.position.set(3.9, 1.5, -1.2); rock.scale.setScalar(0.001);
 world.add(rock);
 
 /* ---------- moods ---------- */
-const LINES = {
+const LINES_ZH = {
   calm: [
     '「別一直盯著瞧呀，知道我長得好看，但眼睛要看花了！」',
     '「想停靠先乖乖排隊。後面排著隊想來看我的小飛船可多著呢，不許插隊！」',
@@ -522,6 +539,97 @@ const LINES = {
     '「今天辛苦啦。……這句話很珍貴的，我只悄悄說一次喔。」'
   ]
 };
+const LINES_JA = {
+  calm: [
+    '「そんなにじっと見ないでよ。僕がきれいなのは知ってるけど、目がチカチカしちゃうでしょ！」',
+    '「停泊したいなら、ちゃんと並んでね。僕を見に来たい宇宙船は後ろにいっぱい並んでるんだから、割り込み禁止！」',
+    '「星の光が左から当たるときが一番きれいなの。角度、ちゃんと覚えた？間違えたら許さないからね。」',
+    '「君の船、ちょっとボロいね。近くに停まったら僕と比べられちゃうよ……でも、もうちょっとだけなら近づいてもいいけど。」',
+    '「居住適性？今日の僕の機嫌がよければ、君がどこに降りたって僕が面倒見てあげる！」'
+  ],
+  shy: [
+    '「……ひゃっ！今、こっそりつついたでしょ？」',
+    '「見る目がある君に免じて、特別にあと二回だけ見せてあげる。二回だけだからね！」',
+    '「僕が熱くなって光ってるのは君のせい？この輝きは生まれつきなの、自惚れないで！」',
+    '「ち、近いってば！氷晶の環は鋭いんだから、君の船が壊れても知らないからね。」',
+    '「ふん、宇宙で一番きれいなのは僕。やっと自分の目で確かめられたでしょ？」'
+  ],
+  proud: [
+    '「ゆっくり見て、じっくり見て。どうせ君は目を離せないって、僕わかってるんだから！」',
+    '「そう！この角度！僕もこの面が一番キラキラしてると思う。君、見る目あるね！」',
+    '「さっき氷晶がぶつかってうるさくて、聞こえなかった。もう一回褒めて、聞きたいの！」',
+    '「センスいいじゃん！特別に、軌道にもう一周期いてもいいよ。うれしいでしょ？」',
+    '「この星の軌道で、この面を見せたのは君だけ。ほかの星なんか見ちゃだめだからね。」'
+  ],
+  sulk: [
+    '「誰が君を待ってるって？自惚れないで。たまたまここで休眠してただけ。」',
+    '「ほかの星でも見に行けば？君がいなくたって、僕は……全然平気だし。」',
+    '「……ふん。かまってよ。」',
+    '「背景の星くず、もう三千個まで数えちゃったよ。君、まだ戻ってこないの……」',
+    '「消灯！今日は早じまい、もう見せてあげない。」'
+  ],
+  mirror: [
+    '「ふふん、今日のこの光の輪も完璧。文句なし！」',
+    '「待ってってば、この切子面の屈折、まだ見足りないの！」',
+    '「氷のかけら一枚一枚に僕が映ってる。宇宙ってやっぱり僕のことえこひいきしてるよね。」',
+    '「光が遮られるってば、ちょっと横にずれて……ねえ、ちょっとでいいの、そんなに離れないで！」',
+    '「自分の地表に立てたら、この景色、一年中見てても飽きないのに。」'
+  ],
+  angry: [
+    '「あんな灰色のボロ石と僕を比べるの？目が壊れてるんじゃない！もう、ムカつく！」',
+    '「反射もできない真っ黒な石だよ？なんで僕と並べて見るわけ？」',
+    '「もう一回あいつを見たら、引力で君の航路を銀河の端まで飛ばしちゃうからね！」',
+    '「あいつの隣に、まるまる十分も停まってたでしょ？正直に白状して！」',
+    '「じゃあ、あのボロ石に住めばいいじゃん！夜中に光って君とおしゃべりしてくれるか見てみなよ、ふん！」'
+  ],
+  freeze: [
+    '「……今のはノーカン、やり直し！もう一回つついて！」',
+    '「ぼ、僕はコアの演算がちょっと遅れただけ。フリーズなんかしてない！」',
+    '「つつくの速すぎ！自転軸も屈折面も、ぜんぶごちゃごちゃになっちゃったじゃん！」',
+    '「あれ？待って、今どの周期まで回ってたっけ？」',
+    '「笑うな！聞こえた？絶対に笑っちゃだめ！」'
+  ],
+  night: [
+    '「まだ寝ないの？……じゃあ、もう少しだけ光っててあげる。ちょっとだけ付き合ってあげるね。」',
+    '「夜になると引力場がすごく静かになるの。君……もうちょっとだけ近くに停まってもいいよ。」',
+    '「眠れないなら、僕の切子面を数えて。ちょうど八十面、数え終わったらちゃんと目を閉じるんだよ。」',
+    '「ずっと小さく光ってるから、暗いのは怖くないよ。明日目を開けたら、すぐに僕が見えるからね。」',
+    '「今日もお疲れさま。……この言葉は貴重なんだから、こっそり一回しか言わないよ。」'
+  ]
+};
+const LINES = { zh: LINES_ZH, ja: LINES_JA };
+const FIXED = {
+  zh: { dots: '「……」', sulkBack: '「剛才暗下來是在省電！才沒有在偷等你，跟你一點關係都沒有！」' },
+  ja: { dots: '「……」', sulkBack: '「さっき暗くなったのは省エネ！君を待ってたわけじゃないし、君とは全然関係ないから！」' }
+};
+const CAP = {
+  zh: { first: '璨，對第一次靠近的探索船', calm: '璨，對靠近的探索船', night: '璨，深夜', shy: '璨，整顆星球亮了一圈',
+        proud: '璨，放慢自轉讓你看清楚', sulk: '璨，背過身去', mirror: '璨，看著冰晶裡的自己', angry: '璨，邊緣長出了尖刺',
+        freeze: '璨，一動也不動', freezeAfter: '璨，假裝什麼都沒發生', sulkBack: '璨，馬上亮了回來' },
+  ja: { first: '璨、はじめて近づいてきた探査船に', calm: '璨、近づいてきた探査船に', night: '璨、深夜', shy: '璨、星ごとぽっと光った',
+        proud: '璨、自転をゆるめて見せびらかす', sulk: '璨、そっぽを向いた', mirror: '璨、氷晶に映る自分に見とれて', angry: '璨、切子面からトゲが生えた',
+        freeze: '璨、ぴたりと止まった', freezeAfter: '璨、何事もなかったふり', sulkBack: '璨、すぐに光り直した' }
+};
+const LABEL = {
+  zh: { calm: '自我欣賞中', night: '安靜發光中', shy: '才、才沒有害羞', proud: '得意忘形中', sulk: '鬧彆扭中',
+        mirror: '照鏡子中，勿擾', angry: '非常不爽', freeze: '當機中' },
+  ja: { calm: '自分に見とれ中', night: '静かに発光中', shy: 'て、照れてないし', proud: '得意絶頂', sulk: 'すねてる',
+        mirror: '鏡に夢中、話しかけないで', angry: 'めちゃくちゃ不機嫌', freeze: 'フリーズ中' }
+};
+const UI = {
+  zh: { loader: '正在對焦', tag: '星球聯動<br>KIRAKIRA CLASS · 鑽石行星',
+        mhint: '點星球、點冰晶環、連戳很多下、放著不管，他都會有反應',
+        r1: '折射率', r2: '自轉週期', r3: '可居住指數', r3v: '他說了算', r4: '目前心情',
+        poke: '戳他一下', compare: '找別顆比較', night: '夜', nightTitle: '深夜模式',
+        desk: '點星球、點冰晶環、雙擊戳他、放著不管也有反應<br>拖曳旋轉　滾輪靠近　<kbd>H</kbd> 隱藏介面　<kbd>F</kbd> 全螢幕',
+        stopped: '停住了', hours: ' 小時' },
+  ja: { loader: 'ピントを合わせています', tag: '惑星コラボ<br>KIRAKIRA CLASS · ダイヤモンド惑星',
+        mhint: '星や氷晶の環をタップしたり、何度もつついたり、放っておいたり。どれにも反応するよ',
+        r1: '屈折率', r2: '自転周期', r3: '居住適性', r3v: '彼の気分しだい', r4: 'いまの気分',
+        poke: 'つついてみる', compare: 'ほかの星と比べる', night: '夜', nightTitle: '深夜モード',
+        desk: '星をクリック、氷晶の環をクリック、ダブルクリックでつつく、放っておいても反応あり<br>ドラッグで回転　ホイールでズーム　<kbd>H</kbd> UIを隠す　<kbd>F</kbd> 全画面',
+        stopped: '停止中', hours: ' 時間' }
+};
 const BASE = { spin: .12, glint: .6, spec: 1, halo: .26, haloSize: 7.5, bloom: .5, expo: 1.05, lift: 0, spread: 0,
   ringSpd: 1, align: 0, tightR: 0, flat: 0, spikes: 0, bands: 0, time: 1, sink: 0, tint: 0, orbit: .35, wobble: 0,
   core: 0x2a3c5e, haloC: 0x9cc4ff, att: 0xd6ecff, tintC: 0xffffff, bandC: 0xffd3ea };
@@ -558,15 +666,41 @@ const TC = {}; for (const k of COLS) TC[k] = new THREE.Color(BASE[k]);
 const quoteEl = document.getElementById('quote'), moodEl = document.getElementById('mood');
 const nightBtn = document.getElementById('night');
 const lastLine = {};
+// a quote is remembered as {s: state, i: index} or {f: fixedKey}, so switching language re-renders the same line
 function pick(name) {
-  const L = LINES[name]; let i;
+  const L = LINES.zh[name]; let i;
   do { i = Math.floor(Math.random() * L.length); } while (L.length > 1 && i === lastLine[name]);
-  lastLine[name] = i; return L[i];
+  lastLine[name] = i; return { s: name, i };
 }
+let cur = { q: { s: 'calm', i: 0 }, cap: 'first' };
+const qText = q => q.f ? FIXED[lang][q.f] : LINES[lang][q.s][q.i];
+function renderQuote() { quoteEl.innerHTML = qText(cur.q) + '<small>' + CAP[lang][cur.cap] + '</small>'; }
 function setQuote(q, cap) {
+  cur = { q, cap };
   quoteEl.classList.add('swap');
-  setTimeout(() => { quoteEl.innerHTML = q + '<small>' + cap + '</small>'; quoteEl.classList.remove('swap'); }, 380);
+  setTimeout(() => { renderQuote(); quoteEl.classList.remove('swap'); }, 380);
 }
+
+let booted = false;
+let lang = (() => {
+  try { const v = localStorage.getItem('can-lang'); if (v === 'zh' || v === 'ja') return v; } catch (_) {}
+  return /^ja/i.test(navigator.language || '') ? 'ja' : 'zh';
+})();
+const langBtn = document.getElementById('lang');
+function applyLang() {
+  document.documentElement.lang = lang === 'ja' ? 'ja' : 'zh-Hant';
+  document.querySelectorAll('[data-i18n]').forEach(el => { const v = UI[lang][el.dataset.i18n]; if (v != null) el.innerHTML = v; });
+  nightBtn.title = UI[lang].nightTitle;
+  langBtn.textContent = lang === 'ja' ? '中文' : '日本語';
+  if (booted) { moodEl.textContent = LABEL[lang][state]; renderQuote(); }
+}
+langBtn.addEventListener('click', () => {
+  lang = lang === 'ja' ? 'zh' : 'ja';
+  try { localStorage.setItem('can-lang', lang); } catch (_) {}
+  quoteEl.classList.add('swap');
+  setTimeout(() => { applyLang(); quoteEl.classList.remove('swap'); }, 300);
+});
+applyLang();
 
 let nightMode = (() => { const h = new Date().getHours(); return h >= 23 || h < 5; })();
 nightBtn.classList.toggle('on', nightMode);
@@ -576,18 +710,19 @@ let state = 'calm', T = target('calm'), rate = 1.6, stateTimer = null, lineTimer
 function enter(name, quote, cap) {
   state = name; T = target(name); rate = S[name].rate;
   for (const k of COLS) TC[k].set(T[k]);
-  setQuote(quote ?? pick(name), cap ?? S[name].cap);
-  moodEl.textContent = S[name].label; moodEl.style.color = S[name].color;
+  setQuote(quote ?? pick(name), cap ?? name);
+  moodEl.textContent = LABEL[lang][name]; moodEl.style.color = S[name].color;
   clearTimeout(stateTimer); clearInterval(lineTimer);
   if (name === 'freeze') {
-    stateTimer = setTimeout(() => { snapUntil = performance.now() + 700; enter(restState(), pick('freeze'), '璨，假裝什麼都沒發生'); }, S.freeze.dur);
+    stateTimer = setTimeout(() => { snapUntil = performance.now() + 700; enter(restState(), pick('freeze'), 'freezeAfter'); }, S.freeze.dur);
   } else if (S[name].dur) {
     stateTimer = setTimeout(() => enter(restState()), S[name].dur);
   } else if (name === 'calm' || name === 'night') {
-    lineTimer = setInterval(() => setQuote(pick(state), S[state].cap), 12000);
+    lineTimer = setInterval(() => setQuote(pick(state), state), 12000);
   }
 }
-enter(restState(), nightMode ? undefined : LINES.calm[0], '璨，對第一次靠近的探索船');
+enter(restState(), nightMode ? undefined : { s: 'calm', i: 0 }, nightMode ? undefined : 'first');
+booted = true;
 const resting = () => state === 'calm' || state === 'night';
 
 // poking: a single poke flusters him, too many in a row and he freezes
@@ -596,7 +731,7 @@ function poke() {
   const now = performance.now();
   pokes = pokes.filter(t => now - t < 3500); pokes.push(now);
   if (state === 'freeze') return;
-  if (pokes.length >= 4) { pokes = []; enter('freeze', '「……」'); return; }
+  if (pokes.length >= 4) { pokes = []; enter('freeze', { f: 'dots' }); return; }
   enter('shy');
 }
 document.getElementById('poke').addEventListener('click', () => { wake(); poke(); });
@@ -610,7 +745,7 @@ nightBtn.addEventListener('click', () => {
 let lastActive = performance.now();
 function wake() {
   lastActive = performance.now();
-  if (state === 'sulk') enter(restState(), '「剛才暗下來是在省電！才沒有在偷等你，跟你一點關係都沒有！」', '璨，馬上亮了回來');
+  if (state === 'sulk') enter(restState(), { f: 'sulkBack' }, 'sulkBack');
 }
 for (const ev of ['pointerdown', 'pointermove', 'wheel', 'keydown', 'touchstart']) addEventListener(ev, wake, { passive: true });
 
@@ -692,7 +827,7 @@ function tick() {
   innerFacets.rotation.y -= dt * 0.2 * P.time; innerFacets.rotation.x += dt * 0.07 * P.time;
   core.rotation.y += dt * 0.3 * P.time;
   planet.scale.setScalar(1 + Math.sin(t * 9) * 0.015 * P.wobble);
-  spinEl.textContent = spin < 0.01 ? '停住了' : (2 * Math.PI / spin / 60 * 24).toFixed(1) + ' 小時';
+  spinEl.textContent = spin < 0.01 ? UI[lang].stopped : (2 * Math.PI / spin / 60 * 24).toFixed(1) + UI[lang].hours;
 
   coreMat.color.copy(PC.core);
   halo.material.color.copy(PC.haloC);
@@ -778,7 +913,7 @@ tick();
   // if WebGL or the 3D library cannot load, say so instead of leaving a black screen
   setTimeout(() => {
     const l = document.getElementById('loader');
-    if (l && !l.classList.contains('done')) l.textContent = '這台裝置好像載入不了 3D 畫面，換個瀏覽器試試看';
+    if (l && !l.classList.contains('done')) l.textContent = document.documentElement.lang === 'ja' ? 'この端末では3D画面を読み込めないみたい。別のブラウザで試してみてね' : '這台裝置好像載入不了 3D 畫面，換個瀏覽器試試看';
   }, 12000);
 </script>
 </body>
