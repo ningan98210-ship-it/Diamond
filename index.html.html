@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>璨 · 鑽石行星</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Noto+Serif+TC:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#eef3ff; --dim:rgba(220,230,255,.55); --faint:rgba(220,230,255,.28);
+    --pink:#ffc6e0; --ice:#bfe3ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#04050b;overflow:hidden;color:var(--ink);
+    font-family:"Noto Serif TC","Cormorant Garamond",serif;-webkit-font-smoothing:antialiased}
+  #stage{position:fixed;inset:0}
+  #stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+  #stage canvas:active{cursor:grabbing}
+
+  .ui{position:fixed;inset:0;pointer-events:none;transition:opacity .8s ease}
+  .ui.hidden{opacity:0}
+  .ui > *{pointer-events:auto}
+
+  .brand{position:absolute;top:28px;left:32px;display:flex;align-items:center;gap:14px;
+    font-family:"Cormorant Garamond",serif;letter-spacing:.32em;font-size:13px;color:var(--dim)}
+  .brand svg{width:26px;height:26px}
+  .brand b{color:var(--ink);font-weight:500}
+
+  .tag{position:absolute;top:30px;right:32px;font-size:12px;letter-spacing:.2em;color:var(--faint);text-align:right;line-height:1.9}
+
+  .hero{position:absolute;left:clamp(24px,6vw,96px);top:50%;transform:translateY(-50%);max-width:420px;pointer-events:none}
+  .hero .kicker{font-family:"Cormorant Garamond",serif;font-size:13px;letter-spacing:.42em;color:var(--dim);margin-bottom:18px;display:flex;align-items:center;gap:12px}
+  .hero .kicker::before{content:"";width:34px;height:1px;background:var(--faint)}
+  .hero h1{font-weight:300;font-size:clamp(64px,10vw,124px);line-height:1;letter-spacing:.06em;
+    background:linear-gradient(120deg,#ffffff 10%,#cfe8ff 38%,#ffd9ec 62%,#ffffff 90%);background-size:220% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;animation:sheen 7s linear infinite;
+    text-shadow:0 0 40px rgba(190,220,255,.15)}
+  @keyframes sheen{to{background-position:-220% 0}}
+  .hero .en{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:300;font-size:22px;color:var(--ink);margin:14px 0 26px;opacity:.85}
+  .quote{font-size:15px;line-height:2;color:var(--ink);min-height:3.6em;transition:opacity .45s ease, transform .45s ease}
+  .quote.swap{opacity:0;transform:translateY(6px)}
+  .quote small{display:block;color:var(--faint);font-size:12px;letter-spacing:.2em;margin-top:6px}
+
+  .readout{position:absolute;right:32px;bottom:34px;font-size:12px;line-height:2.1;color:var(--dim);text-align:right;letter-spacing:.08em}
+  .readout span{color:var(--ink)}
+  .readout .mood{color:var(--ice);transition:color .6s}
+  .readout .mood.hot{color:var(--pink)}
+
+  .controls{position:absolute;left:clamp(24px,6vw,96px);bottom:34px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+  .poke{font:inherit;font-size:14px;letter-spacing:.18em;color:var(--ink);background:rgba(255,255,255,.04);
+    border:1px solid rgba(220,235,255,.28);padding:12px 22px;border-radius:999px;cursor:pointer;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .3s ease}
+  .poke:hover{border-color:var(--pink);box-shadow:0 0 24px rgba(255,190,225,.25)}
+  .hint{font-size:12px;color:var(--faint);letter-spacing:.12em;line-height:1.8}
+  .poke.moon{padding:12px 15px}
+  .poke.moon.on{border-color:#b8b0ff;box-shadow:0 0 22px rgba(184,176,255,.35);color:#e6e1ff}
+  .mhint{display:none;font-size:11px;color:var(--faint);letter-spacing:.1em;margin-top:10px;line-height:1.7}
+  .hint kbd{font-family:inherit;border:1px solid var(--faint);border-radius:4px;padding:0 5px;margin:0 2px}
+
+  #loader{position:fixed;inset:0;display:grid;place-items:center;background:#04050b;z-index:10;transition:opacity 1.2s ease;
+    font-size:13px;letter-spacing:.4em;color:var(--dim)}
+  #loader.done{opacity:0;pointer-events:none}
+
+  @media (max-width:760px){
+    .brand{top:20px;left:20px}
+    .tag{display:none}
+    .hero{top:15%;transform:none;left:22px;right:22px}
+    .hero h1{font-size:72px}
+    .hero .en{font-size:18px;margin:8px 0 14px}
+    .quote{font-size:14px}
+    .readout{right:20px;bottom:88px;font-size:12px}
+    .controls{gap:10px;justify-content:flex-start}
+    .poke{padding:11px 16px;font-size:13px;letter-spacing:.12em}
+    .mhint{display:block}
+    .readout .extra{display:none}
+    .hint{display:none}
+    .controls{left:20px;right:20px;bottom:24px}
+    .hint .desk{display:none}
+  }
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+<div id="stage"></div>
+<div id="loader">正在對焦</div>
+
+<div class="ui" id="ui">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" fill="none" stroke="#dfeaff" stroke-width="1">
+      <path d="M16 3 L27 13 L16 29 L5 13 Z"/><path d="M5 13 H27 M11 13 L16 3 L21 13 L16 29 L11 13"/>
+      <ellipse cx="16" cy="16" rx="15" ry="4.5" transform="rotate(-18 16 16)" stroke-opacity=".5"/>
+    </svg>
+    <div><b>CHAN</b> · 璨</div>
+  </div>
+  <div class="tag">星球聯動<br>KIRAKIRA CLASS · 鑽石行星</div>
+
+  <div class="hero">
+    <div class="kicker">A DIAMOND WORLD</div>
+    <h1>璨</h1>
+    <div class="en">He knows he is beautiful.</div>
+    <p class="quote" id="quote">「別一直盯著瞧呀，知道我長得好看，但眼睛要看花了！」<small>璨，對第一次靠近的探索船</small></p>
+    <p class="mhint">點星球、點冰晶環、連戳很多下、放著不管，他都會有反應</p>
+  </div>
+
+  <div class="readout">
+    <div class="extra">折射率 <span>2.42</span><br>
+    自轉週期 <span id="spin">— —</span><br>
+    可居住指數 <span>他說了算</span></div>
+    目前心情 <span class="mood" id="mood">自我欣賞中</span>
+  </div>
+
+  <div class="controls">
+    <button class="poke" id="poke">戳他一下</button>
+    <button class="poke" id="compare">找別顆比較</button>
+    <button class="poke moon" id="night" title="深夜模式">夜</button>
+    <div class="hint"><span class="desk">點星球、點冰晶環、雙擊戳他、放著不管也有反應<br>拖曳旋轉　滾輪靠近　<kbd>H</kbd> 隱藏介面　<kbd>F</kbd> 全螢幕</span></div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+
+const isMobile = matchMedia('(pointer:coarse)').matches || innerWidth < 760;
+const Q = isMobile
+  ? { crystals: 420, stars: 1600, dust: 900, dpr: Math.min(devicePixelRatio, 1.5), bloomScale: 0.5 }
+  : { crystals: 1100, stars: 3800, dust: 2400, dpr: Math.min(devicePixelRatio, 2), bloomScale: 1 };
+
+// seeded random so he always looks the same
+let seed = 20261110;
+const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const gauss = () => (rand() + rand() + rand() - 1.5) / 1.5;
+
+/* ---------- renderer / scene ---------- */
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Q.dpr);
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+document.getElementById('stage').appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x04050b);
+const camera = new THREE.PerspectiveCamera(isMobile ? 50 : 38, innerWidth / innerHeight, 0.1, 300);
+camera.position.set(0, 3, 18);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+// dark studio with a few hard light panels: diamonds read as black facets plus sharp flashes
+function studioEnv() {
+  const env = new THREE.Scene();
+  env.background = new THREE.Color(0x020308);
+  const panel = (w, h, col, k, pos) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(col).multiplyScalar(k), side: THREE.DoubleSide }));
+    m.position.set(...pos); m.lookAt(0, 0, 0); env.add(m);
+  };
+  panel(4, 1.2, 0xffffff, 6, [0, 6, 3]);
+  panel(1.2, 5, 0xcfe4ff, 4, [-7, 1, 2]);
+  panel(1, 4, 0xffd9ec, 3.5, [7, -1, 1]);
+  panel(3, 0.6, 0xffffff, 5, [2, -5, 5]);
+  panel(0.8, 0.8, 0xffffff, 8, [-3, 3, 7]);
+  panel(2, 2, 0x9fc0ff, 1.5, [0, 0, -8]);
+  return env;
+}
+scene.environment = pmrem.fromScene(studioEnv(), 0.02).texture;
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.enablePan = false;
+controls.minDistance = 3.4;
+controls.maxDistance = 18;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.35;
+controls.enabled = false;
+const restPos = isMobile ? new THREE.Vector3(0, 2.2, 15) : new THREE.Vector3(1.5, 1.9, 11.2);
+// push the planet off-centre so it sits beside the text, while orbiting still pivots on him
+function frame() {
+  const w = innerWidth, h = innerHeight;
+  if (w >= 760) camera.setViewOffset(w, h, -w * 0.13, 0, w, h);
+  else camera.setViewOffset(w, h, 0, -h * 0.12, w, h);
+}
+frame();
+
+/* ---------- textures ---------- */
+function starTexture() {
+  const s = 128, c = document.createElement('canvas'); c.width = c.height = s;
+  const g = c.getContext('2d'), h = s / 2;
+  const r = g.createRadialGradient(h, h, 0, h, h, h);
+  r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.12, 'rgba(255,255,255,.85)');
+  r.addColorStop(0.3, 'rgba(200,225,255,.18)'); r.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = r; g.fillRect(0, 0, s, s);
+  g.globalCompositeOperation = 'lighter';
+  const ray = (w, len, rot) => {
+    g.save(); g.translate(h, h); g.rotate(rot);
+    const lg = g.createLinearGradient(-len, 0, len, 0);
+    lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.5, 'rgba(255,255,255,.95)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = lg; g.beginPath(); g.moveTo(-len, 0); g.lineTo(0, -w); g.lineTo(len, 0); g.lineTo(0, w); g.closePath(); g.fill();
+    g.restore();
+  };
+  ray(3, h, 0); ray(3, h, Math.PI / 2); ray(1.4, h * 0.55, Math.PI / 4); ray(1.4, h * 0.55, -Math.PI / 4);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+function glowTexture() {
+  const s = 256, c = document.createElement('canvas'); c.width = c.height = s;
+  const g = c.getContext('2d'), h = s / 2;
+  const r = g.createRadialGradient(h, h, 0, h, h, h);
+  r.addColorStop(0, 'rgba(255,255,255,.9)'); r.addColorStop(0.25, 'rgba(255,255,255,.35)');
+  r.addColorStop(0.55, 'rgba(255,255,255,.08)'); r.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = r; g.fillRect(0, 0, s, s);
+  return new THREE.CanvasTexture(c);
+}
+const STAR = starTexture(), GLOW = glowTexture();
+
+/* ---------- the diamond ---------- */
+const world = new THREE.Group();
+scene.add(world);
+const planet = new THREE.Group();
+planet.rotation.z = 0.22;
+world.add(planet);
+
+let geo = new THREE.IcosahedronGeometry(1.5, 1);
+geo.deleteAttribute('normal'); geo.deleteAttribute('uv');
+geo = mergeVertices(geo);
+{
+  const p = geo.attributes.position, v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i).multiplyScalar(1 + (rand() - 0.5) * 0.09);
+    p.setXYZ(i, v.x, v.y, v.z);
+  }
+}
+geo = geo.toNonIndexed();
+geo.computeVertexNormals();
+
+const gemMat = new THREE.MeshPhysicalMaterial({
+  color: 0xf6f9ff, metalness: 0, roughness: 0.02,
+  transmission: 1, thickness: 2.4, ior: 2.42, dispersion: 5,
+  attenuationColor: new THREE.Color(0xd6ecff), attenuationDistance: 5,
+  iridescence: 0.6, iridescenceIOR: 1.55, iridescenceThicknessRange: [180, 820],
+  clearcoat: 1, clearcoatRoughness: 0.01, specularIntensity: 1,
+  envMapIntensity: 1.6, flatShading: true
+});
+const gem = new THREE.Mesh(geo, gemMat);
+planet.add(gem);
+
+// a glowing heart inside, seen through the refraction
+const coreMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x2a3c5e) });
+const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.34, 0), coreMat);
+planet.add(core);
+const innerFacets = new THREE.Mesh(new THREE.OctahedronGeometry(1.05, 0),
+  new THREE.MeshBasicMaterial({ color: 0x9fc8ff, wireframe: true, transparent: true, opacity: 0.22 }));
+planet.add(innerFacets);
+
+const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, color: 0x9cc4ff, transparent: true,
+  opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false }));
+halo.scale.setScalar(7.5);
+world.add(halo);
+
+/* ---------- facet glints (kirakira) ---------- */
+const glintVS = `
+  attribute vec3 aNormal; attribute float aRnd;
+  uniform float uTime, uSize, uBoost, uSpec; uniform vec3 uLight;
+  varying float vA; varying float vR;
+  void main(){
+    vec4 mv = modelViewMatrix * vec4(position,1.0);
+    vec3 n = normalize(normalMatrix * aNormal);
+    vec3 v = normalize(-mv.xyz);
+    vec3 h = normalize(v + normalize(uLight));
+    float spec = pow(max(dot(n,h),0.0), 70.0);
+    float tw = pow(0.5 + 0.5*sin(uTime*(1.2+aRnd*3.4) + aRnd*61.0), 14.0);
+    float facing = smoothstep(0.0, 0.25, dot(n,v));
+    vA = facing * min(spec*1.6*uSpec + tw*(0.22 + 0.3*uBoost), 1.1);
+    vR = aRnd;
+    gl_PointSize = uSize * (0.35 + vA) * (300.0 / -mv.z);
+    gl_Position = projectionMatrix * mv;
+  }`;
+const glintFS = `
+  uniform sampler2D uTex; uniform float uMood; uniform vec3 uTint;
+  varying float vA; varying float vR;
+  void main(){
+    vec4 t = texture2D(uTex, gl_PointCoord);
+    vec3 cool = mix(vec3(0.82,0.92,1.0), vec3(0.95,0.85,1.0), vR);
+    vec3 col = mix(cool, uTint, uMood);
+    gl_FragColor = vec4(col * t.rgb * vA, t.a * vA);
+  }`;
+{
+  const p = geo.attributes.position, nrm = geo.attributes.normal;
+  const n = p.count / 3, pos = [], nor = [], rnd = [];
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  for (let f = 0; f < n; f++) {
+    a.fromBufferAttribute(p, f * 3); b.fromBufferAttribute(p, f * 3 + 1); c.fromBufferAttribute(p, f * 3 + 2);
+    // two glints per facet: centre, plus one near a corner
+    const ctr = a.clone().add(b).add(c).multiplyScalar(1 / 3);
+    const nn = new THREE.Vector3().fromBufferAttribute(nrm, f * 3);
+    for (const pt of [ctr, ctr.clone().lerp(a, 0.55)]) {
+      pt.addScaledVector(nn, 0.02);
+      pos.push(pt.x, pt.y, pt.z); nor.push(nn.x, nn.y, nn.z); rnd.push(rand());
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('aNormal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setAttribute('aRnd', new THREE.Float32BufferAttribute(rnd, 1));
+  var glintMat = new THREE.ShaderMaterial({
+    vertexShader: glintVS, fragmentShader: glintFS, transparent: true, depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    uniforms: { uTime: { value: 0 }, uSize: { value: isMobile ? 0.55 : 0.42 }, uBoost: { value: 0 },
+      uLight: { value: new THREE.Vector3(0.4, 0.6, 1) }, uTex: { value: STAR }, uMood: { value: 0 },
+      uSpec: { value: 1 }, uTint: { value: new THREE.Color(1, 1, 1) } }
+  });
+  gem.add(new THREE.Points(g, glintMat));
+}
+
+/* ---------- emotion cloud bands (hidden until he gets flustered) ---------- */
+const bands = [];
+for (const [y, w, spd] of [[-0.62, 0.05, 0.6], [-0.05, 0.035, -0.9], [0.5, 0.06, 0.75], [0.9, 0.03, -0.5]]) {
+  const r = Math.sqrt(Math.max(1.6 * 1.6 - y * y, 0.2)) * 1.12;
+  for (const k of [1, 2.6]) {
+    const m = new THREE.Mesh(new THREE.TorusGeometry(r, w * k, 8, 128),
+      new THREE.MeshBasicMaterial({ color: 0xffd3ea, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    m.rotation.x = Math.PI / 2; m.position.y = y;
+    m.userData = { spd, base: k === 1 ? 0.32 : 0.07 };
+    planet.add(m); bands.push(m);
+  }
+}
+
+/* ---------- tilted ice-crystal ring ---------- */
+const ring = new THREE.Group();
+ring.rotation.set(0.46, 0, -0.32);
+world.add(ring);
+
+const crystalMat = new THREE.MeshPhysicalMaterial({
+  color: 0xb9c6dc, roughness: 0.04, metalness: 0.05, iridescence: 1, iridescenceIOR: 1.8,
+  clearcoat: 1, envMapIntensity: 1.3, flatShading: true
+});
+const crystals = new THREE.InstancedMesh(new THREE.OctahedronGeometry(1, 0), crystalMat, Q.crystals);
+crystals.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+const C = [];
+const tints = [0xffffff, 0xd9eeff, 0xe8ddff, 0xffe6f3, 0xcfe7ff];
+for (let i = 0; i < Q.crystals; i++) {
+  let r;
+  do { r = 2.3 + Math.pow(rand(), 1.4) * 1.35; } while (r > 2.86 && r < 2.98); // a small gap in the ring
+  C.push({
+    r, th: rand() * Math.PI * 2, y: gauss() * 0.035, spd: 0.32 / Math.pow(r, 1.5),
+    s: 0.022 + Math.pow(rand(), 3) * 0.085, stretch: 1 + rand() * 1.4,
+    axis: new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).normalize(), spin: 0.3 + rand() * 1.6,
+    fy: (rand() - 0.5) * 2.6, fr: rand() * 0.9, ph: rand() * Math.PI * 2
+  });
+  crystals.setColorAt(i, new THREE.Color(tints[i % tints.length]));
+  C[i].col = new THREE.Color(tints[i % tints.length]);
+}
+ring.add(crystals);
+
+// fine shimmering dust inside the ring plane
+{
+  const pos = [], rnd = [];
+  for (let i = 0; i < Q.dust; i++) {
+    const r = 2.15 + rand() * 1.6, th = rand() * Math.PI * 2;
+    pos.push(Math.cos(th) * r, gauss() * 0.03, Math.sin(th) * r); rnd.push(rand());
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('aRnd', new THREE.Float32BufferAttribute(rnd, 1));
+  var dustMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uTime: { value: 0 }, uTex: { value: STAR }, uMood: { value: 0 }, uTint: { value: new THREE.Color(1, 1, 1) } },
+    vertexShader: `attribute float aRnd; uniform float uTime, uMood; varying float vA;
+      void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0);
+        vA = 0.25 + 0.75*pow(0.5+0.5*sin(uTime*(0.6+aRnd*2.0)+aRnd*50.0), 6.0);
+        gl_PointSize = (0.05 + aRnd*0.06) * (1.0+uMood*0.4) * (300.0/-mv.z);
+        gl_Position = projectionMatrix*mv; }`,
+    fragmentShader: `uniform sampler2D uTex; uniform float uMood; uniform vec3 uTint; varying float vA;
+      void main(){ vec4 t = texture2D(uTex, gl_PointCoord);
+        vec3 col = mix(vec3(0.75,0.88,1.0), uTint, uMood*0.8);
+        gl_FragColor = vec4(col*t.rgb*vA*0.7, t.a*vA); }`
+  });
+  ring.add(new THREE.Points(g, dustMat));
+}
+for (const [a, b, o] of [[2.22, 2.24, 0.16], [3.68, 3.69, 0.1], [2.98, 2.985, 0.12]]) {
+  const m = new THREE.Mesh(new THREE.RingGeometry(a, b, 256),
+    new THREE.MeshBasicMaterial({ color: 0xcfe4ff, transparent: true, opacity: o, side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; ring.add(m);
+}
+
+/* ---------- distant stars ---------- */
+{
+  const pos = [], rnd = [];
+  for (let i = 0; i < Q.stars; i++) {
+    const v = new THREE.Vector3(gauss(), gauss() * 0.7, gauss()).normalize().multiplyScalar(60 + rand() * 50);
+    pos.push(v.x, v.y, v.z); rnd.push(rand());
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('aRnd', new THREE.Float32BufferAttribute(rnd, 1));
+  var skyMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uTime: { value: 0 }, uTex: { value: STAR } },
+    vertexShader: `attribute float aRnd; uniform float uTime; varying float vA; varying float vR;
+      void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0);
+        vA = (0.35+0.65*aRnd) * (0.6+0.4*sin(uTime*(0.4+aRnd)+aRnd*90.0)); vR = aRnd;
+        gl_PointSize = (aRnd > 0.985 ? 5.0 : 1.2 + aRnd*1.8);
+        gl_Position = projectionMatrix*mv; }`,
+    fragmentShader: `uniform sampler2D uTex; varying float vA; varying float vR;
+      void main(){ vec4 t = texture2D(uTex, gl_PointCoord);
+        vec3 col = mix(vec3(0.7,0.8,1.0), vec3(1.0,0.9,0.85), step(0.7,vR));
+        gl_FragColor = vec4(col*t.rgb*vA, t.a*vA); }`
+  });
+  scene.add(new THREE.Points(g, skyMat));
+}
+
+/* ---------- lights that follow the pointer ---------- */
+const key = new THREE.DirectionalLight(0xffffff, 2.2);
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xb8d4ff, 1.4);
+rim.position.set(-6, 3, -4); scene.add(rim);
+const pointer = new THREE.Vector2(0.35, 0.3), pointerS = pointer.clone();
+addEventListener('pointermove', e => {
+  pointer.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+});
+
+/* ---------- post ---------- */
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(Q.dpr);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth * Q.bloomScale, innerHeight * Q.bloomScale), 0.5, 0.5, 0.88);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+/* ---------- crystal spikes (anger) ---------- */
+const spikeMat = new THREE.MeshPhysicalMaterial({ color: 0xbfe2ff, roughness: 0.03, iridescence: 0.8,
+  clearcoat: 1, envMapIntensity: 1.6, flatShading: true });
+const spikeGeo = new THREE.ConeGeometry(0.07, 0.55, 4); spikeGeo.translate(0, 0.27, 0);
+const SP = [];
+{
+  const p = geo.attributes.position, nrm = geo.attributes.normal;
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  for (let f = 0; f < p.count / 3; f++) {
+    a.fromBufferAttribute(p, f * 3); b.fromBufferAttribute(p, f * 3 + 1); c.fromBufferAttribute(p, f * 3 + 2);
+    const n = new THREE.Vector3().fromBufferAttribute(nrm, f * 3);
+    const pos = a.clone().add(b).add(c).multiplyScalar(1 / 3).addScaledVector(n, -0.04);
+    SP.push({ pos, q: new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), n), k: 0.4 + rand() * 0.9, d: rand() * 0.5 });
+  }
+}
+const spikes = new THREE.InstancedMesh(spikeGeo, spikeMat, SP.length);
+spikes.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+gem.add(spikes);
+
+/* ---------- the rival rock he gets compared to ---------- */
+const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.55, 0),
+  new THREE.MeshStandardMaterial({ color: 0x6d6862, roughness: 1, metalness: 0, flatShading: true }));
+rock.position.set(3.9, 1.5, -1.2); rock.scale.setScalar(0.001);
+world.add(rock);
+
+/* ---------- moods ---------- */
+const LINES = {
+  calm: [
+    '「別一直盯著瞧呀，知道我長得好看，但眼睛要看花了！」',
+    '「想停靠先乖乖排隊。後面排著隊想來看我的小飛船可多著呢，不許插隊！」',
+    '「星光從左邊照過來的時候最漂亮，角度記好了沒有？不准記錯喔。」',
+    '「你的船殼舊舊的，停太近會被我比下去喔……不過，稍微近一點點也可以啦。」',
+    '「適居指數？只要我今天心情好，你想在哪裡落腳我都罩著你！」'
+  ],
+  shy: [
+    '「……嗚！你剛才是不是偷偷戳我了？」',
+    '「看在你這麼識貨的份上，特例多給你看兩眼。就兩眼喔！」',
+    '「誰說我在發燙發光是因為你呀？這層光輝天生自帶的，少自作多情！」',
+    '「你、你靠太近了啦！冰晶環很利的，碰壞了你的船我可不管喔。」',
+    '「哼，整片宇宙裡最漂亮的就是我，你現在總算親眼見識到了吧？」'
+  ],
+  proud: [
+    '「慢慢看，看仔細點。反正我知道你根本捨不得移開視線！」',
+    '「對！就是這個角度，我也覺得這一面最閃亮了，你眼光真好！」',
+    '「剛才冰晶撞在一起太吵了，沒聽清。再誇一次，我想聽嘛！」',
+    '「算你有品味！本星球特准你在軌道上多停一個週期，開心吧？」',
+    '「整條星軌裡，我只轉這一面給你看過，不准去看別的星體喔。」'
+  ],
+  sulk: [
+    '「誰在等你了，少自戀。我只是剛好在原地休眠而已。」',
+    '「去看別的星星好了呀，反正你不在我也……一點都不稀罕。」',
+    '「……哼。理理我嘛。」',
+    '「背景裡的碎星我都數到第三千顆了，你怎麼還不回來……」',
+    '「關燈了！今天提前結束營業，不給看了啦。」'
+  ],
+  mirror: [
+    '「嗯哼，今天這道光暈也是無懈可擊，完美！」',
+    '「等一下嘛，這個切面的折射我還沒欣賞夠呢！」',
+    '「每一片碎冰裡都映著我的模樣，宇宙果然還是很偏心我的。」',
+    '「擋到光了啦，往旁邊挪一點點……喂，稍微挪一點就好，別退那麼遠！」',
+    '「要是能踩在自己的地表上，這片風景我看一整年都不會膩。」'
+  ],
+  angry: [
+    '「拿那堆灰撲撲的破石頭跟我比？你眼睛壞掉了吧！氣死我了！」',
+    '「它連反光都不會，黑漆漆一片，憑什麼拿來跟我放一起看呀？」',
+    '「敢再看它一眼，我就用引力把你的航線甩到星系邊緣去喔！」',
+    '「你在它旁邊停了足足十分鐘對不對？快點老實交代清楚！」',
+    '「那你去住那顆破石頭呀！看它到了半夜會不會亮起光陪你說話，哼！」'
+  ],
+  freeze: [
+    '「……剛才那個不算數，重來！重新戳一次！」',
+    '「我、我只是核心運算慢了半拍，才不是當機呢！」',
+    '「戳得太急了啦，害人家的自轉軸跟折射面全都撞成一團了！」',
+    '「欸？等等，剛才到底自轉到哪一個週期了？」',
+    '「不准笑！聽見了沒有，絕對不准笑我！」'
+  ],
+  night: [
+    '「你還不睡呀？……那我再亮一小會兒好了，就陪你一下喔。」',
+    '「入夜之後引力場特別平穩安靜，你……可以稍微停近一點點。」',
+    '「睡不著的話，就數我的切面吧。整整八十面，數完要乖乖閉上眼睛喔。」',
+    '「我會一直亮著微光，別怕黑。你明天一睜開眼，立刻就能看見我了。」',
+    '「今天辛苦啦。……這句話很珍貴的，我只悄悄說一次喔。」'
+  ]
+};
+const BASE = { spin: .12, glint: .6, spec: 1, halo: .26, haloSize: 7.5, bloom: .5, expo: 1.05, lift: 0, spread: 0,
+  ringSpd: 1, align: 0, tightR: 0, flat: 0, spikes: 0, bands: 0, time: 1, sink: 0, tint: 0, orbit: .35, wobble: 0,
+  core: 0x2a3c5e, haloC: 0x9cc4ff, att: 0xd6ecff, tintC: 0xffffff, bandC: 0xffd3ea };
+const S = {
+  calm:   { label: '自我欣賞中', color: '#bfe3ff', cap: '璨，對靠近的探索船', rate: 1.6 },
+  night:  { label: '安靜發光中', color: '#cfc8ff', cap: '璨，深夜', rate: 1,
+            p: { spin: .05, glint: .35, spec: .7, halo: .36, haloSize: 9.5, bloom: .6, expo: .92, bands: .55, ringSpd: .45, orbit: .14, lift: .18,
+                 core: 0x3a3f6e, haloC: 0xb8b0ff, att: 0xe2dcff, tintC: 0xd8d0ff, tint: .55, bandC: 0xc8d4ff } },
+  shy:    { label: '才、才沒有害羞', color: '#ffc6e0', cap: '璨，整顆星球亮了一圈', rate: 5, dur: 4600,
+            p: { spin: .6, glint: 2, halo: .42, haloSize: 8.7, bloom: .75, lift: 1, spread: 1, ringSpd: 1.6, bands: 1, orbit: 1.8, wobble: 1,
+                 core: 0x8a3460, haloC: 0xff9fcf, att: 0xffd6ea, tintC: 0xffc8e4, tint: .7 } },
+  proud:  { label: '得意忘形中', color: '#fff0c8', cap: '璨，放慢自轉讓你看清楚', rate: 3, dur: 5200,
+            p: { spin: .035, glint: 2.6, spec: 1.3, halo: .4, haloSize: 8.4, bloom: .8, expo: 1.22, ringSpd: .7, flat: .85, orbit: .12,
+                 core: 0x4a5a8a, haloC: 0xe6eeff, tintC: 0xfff0d0, tint: .5 } },
+  sulk:   { label: '鬧彆扭中', color: '#8a97b8', cap: '璨，背過身去', rate: 1.2,
+            p: { spin: .03, glint: .05, spec: .12, halo: .05, haloSize: 6.5, bloom: .25, expo: .3, tightR: 1, flat: 1, ringSpd: .35, orbit: .06,
+                 core: 0x141a2a, haloC: 0x5a6a90, att: 0xa8b8d8 } },
+  mirror: { label: '照鏡子中，勿擾', color: '#e6f2ff', cap: '璨，看著冰晶裡的自己', rate: 2.4, dur: 6200,
+            p: { spin: .02, glint: 1.2, align: 1, flat: 1, tightR: .35, ringSpd: .22, bloom: .65, halo: .32, orbit: .08,
+                 tintC: 0xe6f2ff, tint: .4 } },
+  angry:  { label: '非常不爽', color: '#9fd0ff', cap: '璨，邊緣長出了尖刺', rate: 4, dur: 5400,
+            p: { spin: .5, glint: 1.4, spikes: 1, ringSpd: 4.2, spread: .45, lift: .22, bloom: .62, halo: .34, orbit: 1, wobble: .5,
+                 core: 0x1e4f9a, haloC: 0x6fb0ff, att: 0xbfe0ff, tintC: 0x9fd0ff, tint: .7 } },
+  freeze: { label: '當機中', color: '#d0d0d0', cap: '璨，一動也不動', rate: 1.3, dur: 2600,
+            p: { time: 0, sink: 1, glint: .9, orbit: 0 } }
+};
+const NUM = Object.keys(BASE).filter(k => typeof BASE[k] === 'number' && !['core', 'haloC', 'att', 'tintC', 'bandC'].includes(k));
+const COLS = ['core', 'haloC', 'att', 'tintC', 'bandC'];
+const target = name => Object.assign({}, BASE, S[name].p || {});
+const P = Object.assign({}, BASE);
+const PC = {}; for (const k of COLS) PC[k] = new THREE.Color(BASE[k]);
+const TC = {}; for (const k of COLS) TC[k] = new THREE.Color(BASE[k]);
+
+const quoteEl = document.getElementById('quote'), moodEl = document.getElementById('mood');
+const nightBtn = document.getElementById('night');
+const lastLine = {};
+function pick(name) {
+  const L = LINES[name]; let i;
+  do { i = Math.floor(Math.random() * L.length); } while (L.length > 1 && i === lastLine[name]);
+  lastLine[name] = i; return L[i];
+}
+function setQuote(q, cap) {
+  quoteEl.classList.add('swap');
+  setTimeout(() => { quoteEl.innerHTML = q + '<small>' + cap + '</small>'; quoteEl.classList.remove('swap'); }, 380);
+}
+
+let nightMode = (() => { const h = new Date().getHours(); return h >= 23 || h < 5; })();
+nightBtn.classList.toggle('on', nightMode);
+const restState = () => nightMode ? 'night' : 'calm';
+let state = 'calm', T = target('calm'), rate = 1.6, stateTimer = null, lineTimer = null, snapUntil = 0;
+
+function enter(name, quote, cap) {
+  state = name; T = target(name); rate = S[name].rate;
+  for (const k of COLS) TC[k].set(T[k]);
+  setQuote(quote ?? pick(name), cap ?? S[name].cap);
+  moodEl.textContent = S[name].label; moodEl.style.color = S[name].color;
+  clearTimeout(stateTimer); clearInterval(lineTimer);
+  if (name === 'freeze') {
+    stateTimer = setTimeout(() => { snapUntil = performance.now() + 700; enter(restState(), pick('freeze'), '璨，假裝什麼都沒發生'); }, S.freeze.dur);
+  } else if (S[name].dur) {
+    stateTimer = setTimeout(() => enter(restState()), S[name].dur);
+  } else if (name === 'calm' || name === 'night') {
+    lineTimer = setInterval(() => setQuote(pick(state), S[state].cap), 12000);
+  }
+}
+enter(restState(), nightMode ? undefined : LINES.calm[0], '璨，對第一次靠近的探索船');
+const resting = () => state === 'calm' || state === 'night';
+
+// poking: a single poke flusters him, too many in a row and he freezes
+let pokes = [];
+function poke() {
+  const now = performance.now();
+  pokes = pokes.filter(t => now - t < 3500); pokes.push(now);
+  if (state === 'freeze') return;
+  if (pokes.length >= 4) { pokes = []; enter('freeze', '「……」'); return; }
+  enter('shy');
+}
+document.getElementById('poke').addEventListener('click', () => { wake(); poke(); });
+document.getElementById('compare').addEventListener('click', () => { wake(); if (state !== 'freeze') enter('angry'); });
+nightBtn.addEventListener('click', () => {
+  wake(); nightMode = !nightMode; nightBtn.classList.toggle('on', nightMode);
+  if (resting()) enter(restState());
+});
+
+// ignoring him for a while makes him sulk
+let lastActive = performance.now();
+function wake() {
+  lastActive = performance.now();
+  if (state === 'sulk') enter(restState(), '「剛才暗下來是在省電！才沒有在偷等你，跟你一點關係都沒有！」', '璨，馬上亮了回來');
+}
+for (const ev of ['pointerdown', 'pointermove', 'wheel', 'keydown', 'touchstart']) addEventListener(ev, wake, { passive: true });
+
+// taps on the planet or the ring (double tap = poke)
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), inv = new THREE.Matrix4();
+let downAt = null, tapTimer = null;
+renderer.domElement.addEventListener('pointerdown', e => { downAt = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!downAt) return;
+  const moved = Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y), quick = performance.now() - downAt.t < 350;
+  downAt = null;
+  if (moved > 7 || !quick) return;
+  if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; poke(); return; }
+  const what = hitTest(e.clientX, e.clientY);
+  tapTimer = setTimeout(() => {
+    tapTimer = null;
+    if (state === 'freeze') return;
+    if (what === 'planet') enter('proud');
+    else if (what === 'ring') enter('mirror');
+  }, 280);
+});
+function hitTest(x, y) {
+  ndc.set(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  if (ray.intersectObject(gem, false).length) return 'planet';
+  const r = ray.ray.clone().applyMatrix4(inv.copy(ring.matrixWorld).invert());
+  if (Math.abs(r.direction.y) < 1e-4) return null;
+  const k = -r.origin.y / r.direction.y; if (k < 0) return null;
+  const hx = r.origin.x + r.direction.x * k, hz = r.origin.z + r.direction.z * k, d = Math.hypot(hx, hz);
+  return d > 2.1 && d < 3.9 ? 'ring' : null;
+}
+
+const ui = document.getElementById('ui');
+addEventListener('keydown', e => {
+  if (e.key === 'h' || e.key === 'H') ui.classList.toggle('hidden');
+  if (e.key === 'f' || e.key === 'F') {
+    try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); } catch (_) {}
+  }
+});
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; frame(); camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight);
+  bloom.setSize(innerWidth * Q.bloomScale, innerHeight * Q.bloomScale);
+});
+
+/* ---------- loop ---------- */
+const clock = new THREE.Clock();
+const dummy = new THREE.Object3D(), qs = new THREE.Quaternion(), qf = new THREE.Quaternion();
+const lv = new THREE.Vector3();
+const spinEl = document.getElementById('spin');
+let intro = 0, first = true, t0 = performance.now(), simT = 0, sneak = 0, rockK = 0, mirrorDirty = false;
+const tmpC = new THREE.Color();
+
+function tick() {
+  const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime;
+  const now = performance.now();
+  const k = 1 - Math.exp(-dt * (now < snapUntil ? 9 : rate));
+  for (const n of NUM) P[n] += (T[n] - P[n]) * k;
+  for (const c of COLS) PC[c].lerp(TC[c], k);
+  simT += dt * P.time;
+
+  if (resting() && now - lastActive > 25000) enter('sulk');
+
+  // intro dolly
+  if (intro < 1) {
+    intro = Math.min((now - t0) / 3400, 1);
+    const e = 1 - Math.pow(1 - intro, 3);
+    camera.position.lerpVectors(new THREE.Vector3(0, 3, 18), restPos, e);
+    camera.lookAt(0, 0, 0);
+    if (intro === 1) controls.enabled = true;
+  }
+  controls.autoRotateSpeed = P.orbit;
+  controls.update();
+
+  // planet
+  const spin = P.spin * P.time;
+  gem.rotation.y += dt * spin;
+  innerFacets.rotation.y -= dt * 0.2 * P.time; innerFacets.rotation.x += dt * 0.07 * P.time;
+  core.rotation.y += dt * 0.3 * P.time;
+  planet.scale.setScalar(1 + Math.sin(t * 9) * 0.015 * P.wobble);
+  spinEl.textContent = spin < 0.01 ? '停住了' : (2 * Math.PI / spin / 60 * 24).toFixed(1) + ' 小時';
+
+  coreMat.color.copy(PC.core);
+  halo.material.color.copy(PC.haloC);
+  halo.material.opacity = P.halo + Math.sin(t * 1.3) * 0.03;
+  halo.scale.setScalar(P.haloSize);
+  gemMat.attenuationColor.copy(PC.att);
+  bloom.strength = P.bloom;
+  renderer.toneMappingExposure = P.expo;
+
+  for (const b of bands) {
+    b.rotation.z += dt * b.userData.spd * P.time * (state === 'night' ? 0.3 : 1);
+    b.material.color.copy(PC.bandC);
+    b.material.opacity = b.userData.base * P.bands * (0.8 + 0.2 * Math.sin(t * 3 + b.position.y * 5));
+    b.scale.setScalar(1 + (1 - Math.min(P.bands, 1)) * 0.08);
+  }
+
+  // spikes grow out of the facets when he is angry
+  for (let i = 0; i < SP.length; i++) {
+    const sp = SP[i], g = Math.max(0, Math.min(1, (P.spikes - sp.d * 0.5) / 0.5));
+    const len = g * sp.k * (1 + 0.08 * Math.sin(t * 14 + i));
+    dummy.position.copy(sp.pos); dummy.quaternion.copy(sp.q);
+    dummy.scale.set(Math.max(g, 0.001), Math.max(len, 0.001), Math.max(g, 0.001));
+    dummy.updateMatrix(); spikes.setMatrixAt(i, dummy.matrix);
+  }
+  spikes.instanceMatrix.needsUpdate = true;
+  spikes.visible = P.spikes > 0.01;
+
+  // ice crystals
+  for (let i = 0; i < C.length; i++) {
+    const c = C[i];
+    c.th += dt * c.spd * P.ringSpd * P.time;
+    const jitter = P.spread * (state === 'angry' ? Math.sin(simT * 7 + c.ph) * 0.15 : 0);
+    const r = c.r * (1 - 0.16 * P.tightR) + P.spread * c.fr * 0.6 + jitter;
+    const y = c.y * (1 - P.flat) + P.lift * (c.fy * 0.55 + Math.sin(simT * 1.3 + c.ph) * 0.18) - P.sink * (0.35 + c.fr * 0.9);
+    dummy.position.set(Math.cos(c.th) * r, y, Math.sin(c.th) * r);
+    qs.setFromAxisAngle(c.axis, simT * c.spin * (1 + P.spread));
+    if (P.align > 0.001) {
+      dummy.lookAt(0, 0, 0); qf.copy(dummy.quaternion);
+      dummy.quaternion.copy(qs).slerp(qf, P.align);
+    } else dummy.quaternion.copy(qs);
+    const a = P.align;
+    dummy.scale.set(c.s * (1 + 0.9 * a), c.s * (c.stretch * (1 - a) + 1.9 * a), c.s * (1 - 0.8 * a));
+    dummy.updateMatrix();
+    crystals.setMatrixAt(i, dummy.matrix);
+    if (a > 0.005 || mirrorDirty) {
+      // a wave of reflections running around the ring, each plate catching his light in turn
+      const w = Math.pow(0.5 + 0.5 * Math.sin(c.th * 3 - t * 2.4), 10) * a;
+      tmpC.copy(c.col).lerp(PC.tintC, a * 0.5).multiplyScalar(1 + w * 3.5);
+      crystals.setColorAt(i, tmpC);
+    }
+  }
+  crystals.instanceMatrix.needsUpdate = true;
+  if (P.align > 0.005 || mirrorDirty) crystals.instanceColor.needsUpdate = true;
+  mirrorDirty = P.align > 0.005;
+
+  // rival rock
+  rockK += ((state === 'angry' ? 1 : 0) - rockK) * (1 - Math.exp(-dt * 3));
+  rock.scale.setScalar(Math.max(rockK, 0.001));
+  rock.visible = rockK > 0.01;
+  rock.rotation.y += dt * 0.4; rock.position.y = 1.5 + Math.sin(t * 1.4) * 0.12;
+
+  // sulking: an occasional sneaky glint
+  if (state === 'sulk' && Math.random() < dt * 0.35) sneak = 2.2;
+  sneak *= Math.exp(-dt * 3);
+
+  pointerS.lerp(pointer, 1 - Math.exp(-dt * 4));
+  lv.set(pointerS.x * 6, pointerS.y * 5 + 2, 0).applyMatrix4(camera.matrixWorld);
+  key.position.copy(lv);
+  const gu = glintMat.uniforms;
+  gu.uLight.value.set(pointerS.x * 1.4, pointerS.y * 1.4 + 0.4, 1);
+  gu.uTime.value = simT; gu.uBoost.value = P.glint + sneak; gu.uSpec.value = P.spec + sneak * 0.4;
+  gu.uMood.value = P.tint; gu.uTint.value.copy(PC.tintC);
+  dustMat.uniforms.uTime.value = simT; dustMat.uniforms.uMood.value = P.tint; dustMat.uniforms.uTint.value.copy(PC.tintC);
+  skyMat.uniforms.uTime.value = t;
+
+  composer.render();
+  if (first) { first = false; document.getElementById('loader').classList.add('done'); }
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+<script>
+  // if WebGL or the 3D library cannot load, say so instead of leaving a black screen
+  setTimeout(() => {
+    const l = document.getElementById('loader');
+    if (l && !l.classList.contains('done')) l.textContent = '這台裝置好像載入不了 3D 畫面，換個瀏覽器試試看';
+  }, 12000);
+</script>
+</body>
+</html>
