@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>When the Stars Go Out</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,400;1,500&family=Noto+Serif+TC:wght@400;600&display=swap">
+<style>
+/* One-screen player: canvas sky behind, planet upper third, lyrics lower third, thin control rail at the bottom. Single dark look by design. */
+:root{--void:#04050b;--ink:#eef3ff;--dim:#8a95b4;--ice:#bfe3ff;--rose:#ffc6e0;--line:rgba(191,227,255,.18);
+--en:"Cormorant Garamond","Times New Roman",serif;--zh:"Noto Serif TC","Songti TC",serif;--ui:ui-monospace,"SF Mono",Menlo,monospace;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--void);color:var(--ink);overflow:hidden;font-family:var(--zh)}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.ui{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(env(safe-area-inset-top,0px) + 14px) calc(env(safe-area-inset-bottom,0px) + 14px);pointer-events:none}
+.top{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font:11px/1.6 var(--ui);letter-spacing:.18em;color:var(--dim)}
+.top b{display:block;font:italic 500 22px/1.1 var(--en);letter-spacing:.02em;color:var(--ink);margin-top:2px}
+.lyr{text-align:center;margin:0 auto 22px;max-width:640px;width:100%;display:flex;flex-direction:column;gap:10px;min-height:36vh;justify-content:flex-end}
+.lyr .ln{transition:opacity .6s,transform .6s,filter .6s}
+.lyr .side{opacity:.32;filter:blur(.6px);font-size:.82em}
+.lyr .side .z{display:none}
+.e{font:italic 500 clamp(21px,5.4vw,32px)/1.25 var(--en);text-wrap:balance;text-shadow:0 0 18px rgba(191,227,255,.35)}
+.z{font:400 clamp(13px,3.4vw,16px)/1.6 var(--zh);color:var(--rose);margin-top:4px;letter-spacing:.06em;text-wrap:balance}
+.cur{animation:rise .7s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(10px);filter:blur(4px)}}
+[data-mode="en"] .z{display:none}[data-mode="zh"] .cur .e,[data-mode="zh"] .side .e{display:none}[data-mode="zh"] .side .z{display:block}
+[data-mode="zh"] .cur .z{font-size:clamp(17px,4.6vw,22px);color:var(--ink)}
+.bar{pointer-events:auto;display:flex;align-items:center;gap:12px;max-width:640px;width:100%;margin:0 auto;font:11px var(--ui);color:var(--dim);font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:1px solid var(--line);border-radius:99px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:1px solid var(--ice);outline-offset:3px}
+#pp{width:38px;height:38px;flex:none;display:grid;place-items:center;color:var(--ink);font-size:13px}
+#seek{flex:1;min-width:0;accent-color:#cfe8ff;height:2px}
+#mode{padding:6px 10px;letter-spacing:.1em;flex:none}
+.gate{position:fixed;inset:0;display:grid;place-items:center;text-align:center;background:radial-gradient(60% 50% at 50% 40%,rgba(30,44,80,.35),rgba(4,5,11,.92));transition:opacity 1.2s;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.gate.off{opacity:0;pointer-events:none}
+.gate p{font:11px/1.9 var(--ui);letter-spacing:.2em;color:var(--dim)}
+.gate h1{font:italic 500 clamp(30px,8vw,48px)/1.1 var(--en);margin:14px 0 6px;letter-spacing:.01em}
+.gate .s{font:15px var(--zh);color:var(--rose);letter-spacing:.2em}
+.gate button{margin-top:28px;padding:11px 30px;letter-spacing:.3em;font:12px var(--ui);color:var(--ice);border-color:rgba(191,227,255,.6);box-shadow:0 0 22px rgba(191,227,255,.25)}
+.note{margin-top:14px;font:10px var(--ui);color:var(--dim);letter-spacing:.1em}
+@media (prefers-reduced-motion:reduce){.cur{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div class="ui" id="ui" data-mode="both">
+<div class="top"><div>◇ 遲星 d・CHN-242<b>When the Stars Go Out</b></div><div style="text-align:right">璨<br><span id="tm">00:00</span></div></div>
+<div class="lyr" id="lyr"></div>
+<div class="bar"><button id="pp" aria-label="播放">▶</button><span id="t0">00:00</span><input id="seek" type="range" min="0" max="1000" value="0" aria-label="進度"><span id="t1">00:00</span><button id="mode">中英</button></div>
+</div>
+<div class="gate" id="gate"><div><p>◇ 方舟 58 號・通訊頻道<br>收到來自遲星 d 的訊號</p><h1>When the Stars Go Out</h1><div class="s">璨</div><button id="go">接收訊號</button><div class="note" id="note"></div></div></div>
+<audio id="au" src="song.mp3" preload="auto"></audio>
+<script>
+const LRC=`[00:17.50]Seven billion years I waited in the dark,
+[00:23.84]practicing my softest smile on the ice.
+[00:30.00]The dim star rose and fell a billion times,
+[00:36.36]and no one ever looked at me twice.
+[00:42.70]Then you came drifting in so slow,
+[00:49.08]a little light across my sky.
+[00:55.40]You looked at me eleven minutes long,
+[00:59.40]and I forgot how to say goodbye.
+[01:05.82]When the stars go out like candles, one by one,
+[01:12.24]and the sky comes drifting down like snow,
+[01:18.20]I'll hold you till there's nothing left of us but light,
+[01:24.42]and I'll never be alone, no, never be alone.
+[01:31.82]Lie with me, lie with me, in the flowers from your home,
+[01:39.06]at the end of everything, I'm finally not alone.
+[01:52.04]Your skin is turning cold and clear,
+[01:58.14]like morning light on frozen glass.
+[02:03.62]Don't be afraid, love, it's only me,
+[02:10.74]I'm learning how to make you last.
+[02:15.42]Every laugh you left is sleeping in a jellyfish of light,
+[02:21.30]every breath, every word, every sigh,
+[02:28.82]and when the universe forgets our names,
+[02:34.84]I'll still remember you and I.
+[02:39.94]When the stars go out like candles, one by one,
+[02:46.26]and the sky comes drifting down like snow,
+[02:52.18]I'll hold you till there's nothing left of us but light,
+[02:58.42]and I'll never be alone, no, never be alone.
+[03:05.84]Lie with me, lie with me, in the flowers from your home,
+[03:12.94]at the end of everything, I'm finally not alone.
+[03:19.06]Don't go back to Earth, my love,
+[03:21.88]there's nothing waiting there but rain.
+[03:25.14]Let the ship sleep, let the old stars die,
+[03:28.26]I'll be your sky, I'll say your name.
+[03:31.44]Fold into me, fold into me,
+[03:34.70]skin to crystal, heart to heart,
+[03:37.68]till there's no line where you end and I begin,
+[03:41.60]no light that ever pulls apart.
+[03:45.66]When the stars go out like candles, one by one,
+[03:51.94]and the end comes softly through the snow,
+[03:57.74]we'll turn to diamond, you and me,
+[04:03.98]and I will never let you go.
+[04:11.36]Lie with me, lie with me, now the lights are gone,
+[04:22.98]seven billion years of night, and then, you came along.
+[04:36.62]Stay.
+[04:47.80]...Just stay.`;
+const ZH={"Seven billion years I waited in the dark,": "七十億年，我在幽暗裡靜靜守候，", "practicing my softest smile on the ice.": "對著冰面，反覆練習最柔軟的微笑。", "The dim star rose and fell a billion times,": "黯淡的遲星起落十億回，", "and no one ever looked at me twice.": "卻從未有誰，願意多看我一眼。", "Then you came drifting in so slow,": "直到你緩緩漂流而來，", "a little light across my sky.": "成為劃過我天幕的一點微光。", "You looked at me eleven minutes long,": "你凝視了我整整十一分鐘，", "and I forgot how to say goodbye.": "我便從此忘了，該如何道別。", "When the stars go out like candles, one by one,": "當繁星如燭火般逐一熄滅，", "and the sky comes drifting down like snow,": "當整片天穹化作碎雪紛飛墜落，", "I'll hold you till there's nothing left of us but light,": "我會緊緊擁著你，直到我們只剩純粹的光，", "and I'll never be alone, no, never be alone.": "而我再也不會孤單，再也不會孤單。", "Lie with me, lie with me, in the flowers from your home,": "躺在我身邊吧，躺在我身邊，在你故鄉的花叢裡，", "at the end of everything, I'm finally not alone.": "在萬物終結之處，我終於不再是一個人。", "Your skin is turning cold and clear,": "你的肌膚漸漸變得冰涼澄澈，", "like morning light on frozen glass.": "宛如晨光穿透凝霜的琉璃。", "Don't be afraid, love, it's only me,": "別怕，親愛的，那只是我，", "I'm learning how to make you last.": "我正在學著，如何留住你的永恆。", "Every laugh you left is sleeping in a jellyfish of light,": "你遺落的每聲輕笑，都沉睡在發光的水母裡，", "every breath, every word, every sigh,": "每一口呼吸，每一句低語，每一聲輕嘆，", "and when the universe forgets our names,": "當整座宇宙終於遺忘我們的名字，", "I'll still remember you and I.": "我依然會記得，你與我。", "Don't go back to Earth, my love,": "別回地球去了，我的愛，", "there's nothing waiting there but rain.": "那裡除了連綿的雨，什麼也沒在等你。", "Let the ship sleep, let the old stars die,": "讓方舟沉睡，讓古老的星辰凋零，", "I'll be your sky, I'll say your name.": "我會成為你的天空，輕喚你的名字。", "Fold into me, fold into me,": "融入我吧，徹底融入我，", "skin to crystal, heart to heart,": "肌膚化作結晶，心臟貼緊心臟，", "till there's no line where you end and I begin,": "直到再也分不清，哪裡是你的盡頭，哪裡是我的起點，", "no light that ever pulls apart.": "再也沒有任何光芒，能將我們拆散。", "and the end comes softly through the snow,": "當終點踩著碎雪輕悄降臨，", "we'll turn to diamond, you and me,": "我們會化為鑽石，你與我，", "and I will never let you go.": "而我永遠不會鬆開你的手。", "Lie with me, lie with me, now the lights are gone,": "躺在我身邊吧，躺在我身邊，此刻燈火俱滅，", "seven billion years of night, and then, you came along.": "漫長七十億年的永夜過後，你終於來了。", "Stay.": "留下來。", "...Just stay.": "……在我身邊。"};
+const lines=[];LRC.split('\n').forEach(l=>{const m=[...l.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)];const tx=l.replace(/\[[^\]]*\]/g,'').trim();m.forEach(x=>lines.push({t:+x[1]*60+ +x[2],e:tx}))});
+lines.sort((a,b)=>a.t-b.t);
+// bilingual LRC: same timestamp twice -> second is Chinese
+for(let i=lines.length-1;i>0;i--){if(Math.abs(lines[i].t-lines[i-1].t)<.01&&lines[i].e&&lines[i-1].e){lines[i-1].z=lines[i].e;lines.splice(i,1)}}
+lines.forEach(l=>{if(!l.z)l.z=ZH[l.e]||''});
+const au=document.getElementById('au'),pp=document.getElementById('pp'),seek=document.getElementById('seek'),lyr=document.getElementById('lyr'),ui=document.getElementById('ui');
+let demo=false,dt0=0,dpos=0,dplay=false;const DEMO_LEN=(lines.length?lines[lines.length-1].t:200)+4;
+au.addEventListener('error',()=>{demo=true;document.getElementById('note').textContent='預覽模式：還沒放入音檔，歌詞照預估時間播放'});
+function dur(){return demo?DEMO_LEN:(au.duration||DEMO_LEN)}
+function now(){return demo?(dplay?dpos+(performance.now()-dt0)/1000:dpos):au.currentTime}
+function playing(){return demo?dplay:!au.paused}
+function play(){if(demo){if(!dplay){dt0=performance.now();dplay=true}}else au.play().catch(()=>{demo=true;play()})}
+function pause(){if(demo){dpos=now();dplay=false}else au.pause()}
+function setT(t){if(demo){dpos=t;dt0=performance.now()}else au.currentTime=t}
+const fmt=s=>{s=Math.max(0,s|0);return String(s/60|0).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+document.getElementById('go').onclick=()=>{document.getElementById('gate').classList.add('off');play()};
+pp.onclick=()=>playing()?pause():play();
+seek.oninput=()=>setT(seek.value/1000*dur());
+const modes=[['both','中英'],['en','EN'],['zh','中']];let mi=0;
+document.getElementById('mode').onclick=e=>{mi=(mi+1)%3;ui.dataset.mode=modes[mi][0];e.target.textContent=modes[mi][1]};
+let curIdx=-2;
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function ln(l,cls){return l&&l.e?`<div class="ln ${cls}"><div class="e">${esc(l.e)}</div><div class="z">${esc(l.z||'')}</div></div>`:`<div class="ln ${cls}"><div class="e">&nbsp;</div></div>`}
+function renderLyr(i){const c=lines[i];lyr.innerHTML=ln(lines[i-1],'side')+(c&&c.e?ln(c,'cur'):`<div class="ln cur"><div class="e" style="opacity:.5">· · ·</div></div>`)+ln(lines[i+1],'side')}
+// ---------- sky ----------
+const cv=document.getElementById('cv'),cx=cv.getContext('2d');let W,H,DPR;
+function rs(){DPR=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0)}addEventListener('resize',rs);rs();
+const R=Math.random;const stars=Array.from({length:320},(_,i)=>({x:R(),y:R(),r:R()*1.3+.2,p:R()*6.28,s:.5+R()*2,o:R(),h:R()<.15}));
+const snow=Array.from({length:90},()=>({x:R(),y:R(),v:.02+R()*.05,r:R()*1.6+.4,w:R()*6.28}));
+const ring=Array.from({length:150},(_,i)=>({a:i/150*6.28+R()*.03,d:1.55+R()*.18,r:R()*1.6+.6,tw:R()*6.28}));
+const facets=[];{const n=9;for(let k=0;k<n;k++){const a1=k/n*6.28,a2=(k+1)/n*6.28;facets.push([[0,0],[Math.cos(a1)*.55,Math.sin(a1)*.55-.05],[Math.cos(a2)*.55,Math.sin(a2)*.55-.05]],[[Math.cos(a1)*.55,Math.sin(a1)*.55-.05],[Math.cos(a1),Math.sin(a1)],[Math.cos(a2),Math.sin(a2)]],[[Math.cos(a1)*.55,Math.sin(a1)*.55-.05],[Math.cos(a2)*.55,Math.sin(a2)*.55-.05],[Math.cos(a2),Math.sin(a2)]])}}
+const fa=facets.map(()=>R());
+function glint(x,y,s,a){cx.save();cx.globalAlpha=a;cx.translate(x,y);cx.fillStyle='#fff';cx.beginPath();for(let k=0;k<4;k++){cx.rotate(Math.PI/2);cx.moveTo(0,-s);cx.lineTo(s*.12,0);cx.lineTo(0,s*.12)}cx.fill();const g=cx.createRadialGradient(0,0,0,0,0,s*.6);g.addColorStop(0,'rgba(255,255,255,.9)');g.addColorStop(1,'rgba(255,255,255,0)');cx.fillStyle=g;cx.fillRect(-s,-s,s*2,s*2);cx.restore()}
+let last=performance.now();
+function frame(T){const dtm=Math.min(.05,(T-last)/1000);last=T;const t=now(),D=dur(),prog=Math.min(1,t/D);const on=playing();
+ // stars go out progressively in the last 45% of the song
+ const out=Math.max(0,Math.min(1,(prog-.45)/.42));const end=Math.max(0,(prog-.93)/.07);
+ cx.fillStyle='#04050b';cx.fillRect(0,0,W,H);
+ const neb=cx.createRadialGradient(W*.5,H*.34,0,W*.5,H*.34,Math.max(W,H)*.7);neb.addColorStop(0,`rgba(40,70,120,${.35+end*.2})`);neb.addColorStop(.45,'rgba(26,22,60,.18)');neb.addColorStop(1,'rgba(4,5,11,0)');cx.fillStyle=neb;cx.fillRect(0,0,W,H);
+ for(const s of stars){if(s.o<out)continue;const fl=s.o<out+.04?1+(out+.04-s.o)*25:1;const a=(.35+.65*Math.abs(Math.sin(T/1000*s.s*.6+s.p)))*Math.min(1,(s.o-out)*12);cx.globalAlpha=a;cx.fillStyle=s.h?'#ffd9ec':'#dcebff';cx.beginPath();cx.arc(s.x*W,s.y*H,s.r*fl,0,6.28);cx.fill();if(fl>1.5)glint(s.x*W,s.y*H,s.r*fl*3,.6)}
+ cx.globalAlpha=1;
+ // snow: diamond dust, heavier as the end nears
+ const sn=Math.floor(snow.length*(.25+out*.75));for(let i=0;i<sn;i++){const p=snow[i];if(on)p.y+=p.v*dtm;if(p.y>1.05){p.y=-.05;p.x=R()}const x=(p.x+Math.sin(T/2000+p.w)*.01)*W;cx.globalAlpha=.55;cx.fillStyle='#eaf4ff';cx.beginPath();cx.arc(x,p.y*H,p.r,0,6.28);cx.fill()}
+ cx.globalAlpha=1;
+ // planet
+ const PX=W/2,PY=H*.33,PR=Math.min(W,H)*.15*(1+.015*Math.sin(T/1000*6.28*76/60)*(on?1:0));const rot=T/1000*.12,tilt=-.42;
+ const halo=cx.createRadialGradient(PX,PY,PR*.8,PX,PY,PR*3.2);halo.addColorStop(0,`rgba(${190+end*60|0},${220-end*20|0},255,.28)`);halo.addColorStop(1,'rgba(150,200,255,0)');cx.fillStyle=halo;cx.fillRect(PX-PR*3.3,PY-PR*3.3,PR*6.6,PR*6.6);
+ function ringPass(front){for(const d of ring){const a=d.a+rot;const sy=Math.sin(a);if((sy>0)!==front)continue;const ex=Math.cos(a)*PR*d.d,ey=sy*PR*d.d*.3;const x=PX+ex*Math.cos(tilt)-ey*Math.sin(tilt),y=PY+ex*Math.sin(tilt)+ey*Math.cos(tilt);const a2=(.4+.6*Math.abs(Math.sin(T/700+d.tw)))*(front?1:.55);cx.globalAlpha=a2;cx.fillStyle='#e6f4ff';cx.beginPath();cx.arc(x,y,d.r,0,6.28);cx.fill();if(front&&d.r>2&&Math.sin(T/900+d.tw)>.97)glint(x,y,d.r*5,.9)}cx.globalAlpha=1}
+ ringPass(false);
+ cx.save();cx.beginPath();cx.arc(PX,PY,PR,0,6.28);cx.clip();
+ const body=cx.createRadialGradient(PX-PR*.35,PY-PR*.4,PR*.1,PX,PY,PR*1.05);body.addColorStop(0,'#ffffff');body.addColorStop(.45,'#cfe2fb');body.addColorStop(1,'#6f8fc4');cx.fillStyle=body;cx.fillRect(PX-PR,PY-PR,PR*2,PR*2);
+ cx.translate(PX,PY);cx.rotate(Math.sin(T/9000)*.2);
+ facets.forEach((f,i)=>{const v=.5+.5*Math.sin(T/1600+fa[i]*9);cx.beginPath();cx.moveTo(f[0][0]*PR,f[0][1]*PR);cx.lineTo(f[1][0]*PR,f[1][1]*PR);cx.lineTo(f[2][0]*PR,f[2][1]*PR);cx.closePath();cx.fillStyle=fa[i]<.5?`rgba(255,255,255,${.08+v*.28})`:`rgba(150,190,255,${.05+v*.18})`;cx.fill();cx.strokeStyle='rgba(255,255,255,.35)';cx.lineWidth=.6;cx.stroke()});
+ const pr=cx.createLinearGradient(-PR,-PR,PR,PR);pr.addColorStop(.3,'rgba(255,170,220,0)');pr.addColorStop(.5,`rgba(255,190,230,${.12+end*.2})`);pr.addColorStop(.7,'rgba(160,240,255,0)');cx.fillStyle=pr;cx.fillRect(-PR,-PR,PR*2,PR*2);
+ cx.restore();
+ const rim=cx.createRadialGradient(PX,PY,PR*.85,PX,PY,PR*1.02);rim.addColorStop(0,'rgba(10,20,60,0)');rim.addColorStop(1,'rgba(10,20,60,.35)');cx.fillStyle=rim;cx.beginPath();cx.arc(PX,PY,PR,0,6.28);cx.fill();
+ ringPass(true);
+ glint(PX-PR*.42,PY-PR*.5,PR*.28*(.6+.4*Math.sin(T/800)),.85);
+ // lyrics sync
+ let i=-1;for(let k=0;k<lines.length;k++){if(lines[k].t<=t+.05)i=k;else break}
+ if(i!==curIdx){curIdx=i;renderLyr(i)}
+ document.getElementById('t0').textContent=fmt(t);document.getElementById('t1').textContent=fmt(D);document.getElementById('tm').textContent=fmt(t);
+ if(document.activeElement!==seek)seek.value=Math.round(prog*1000);
+ pp.textContent=on?'❚❚':'▶';pp.setAttribute('aria-label',on?'暫停':'播放');
+ if(demo&&dplay&&t>=DEMO_LEN){dplay=false;dpos=0}
+ requestAnimationFrame(frame)}
+renderLyr(-1);requestAnimationFrame(frame);
+</script>
+
+</body>
+</html>

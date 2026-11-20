@@ -6,7 +6,7 @@
 <title>璨 · 鑽石行星</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Noto+Serif+TC:wght@300;500;700&family=Noto+Serif+JP:wght@300;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Noto+Serif+TC:wght@300;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#eef3ff; --dim:rgba(220,230,255,.55); --faint:rgba(220,230,255,.28);
@@ -28,14 +28,9 @@
   .brand svg{width:26px;height:26px}
   .brand b{color:var(--ink);font-weight:500}
 
-  html[lang="ja"] body{font-family:"Noto Serif JP","Cormorant Garamond",serif}
-  .lang{position:absolute;top:24px;right:32px;font:inherit;font-size:12px;letter-spacing:.16em;color:var(--ink);
-    background:rgba(255,255,255,.04);border:1px solid rgba(220,235,255,.28);border-radius:999px;padding:7px 14px;cursor:pointer;
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .3s ease}
-  .lang:hover{border-color:var(--ice)}
-  .tag{position:absolute;top:70px;right:32px;font-size:12px;letter-spacing:.2em;color:var(--faint);text-align:right;line-height:1.9}
+  .tag{position:absolute;top:30px;right:32px;font-size:12px;letter-spacing:.2em;color:var(--faint);text-align:right;line-height:1.9}
 
-  .hero{position:absolute;left:clamp(24px,6vw,96px);top:50%;transform:translateY(-50%);max-width:360px;pointer-events:none}
+  .hero{position:absolute;left:clamp(24px,6vw,96px);top:50%;transform:translateY(-50%);max-width:420px;pointer-events:none}
   .hero .kicker{font-family:"Cormorant Garamond",serif;font-size:13px;letter-spacing:.42em;color:var(--dim);margin-bottom:18px;display:flex;align-items:center;gap:12px}
   .hero .kicker::before{content:"";width:34px;height:1px;background:var(--faint)}
   .hero h1{font-weight:300;font-size:clamp(64px,10vw,124px);line-height:1;letter-spacing:.06em;
@@ -64,6 +59,22 @@
   .mhint{display:none;font-size:11px;color:var(--faint);letter-spacing:.1em;margin-top:10px;line-height:1.7}
   .hint kbd{font-family:inherit;border:1px solid var(--faint);border-radius:4px;padding:0 5px;margin:0 2px}
 
+  .lyr{display:none;margin:-14px -40px -10px -40px;min-height:8.5em;padding:30px 40px 26px;background:radial-gradient(ellipse 70% 62% at 45% 50%,rgba(4,5,11,.62) 0%,rgba(4,5,11,.38) 50%,rgba(4,5,11,0) 100%);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);-webkit-mask-image:radial-gradient(ellipse 75% 70% at 45% 50%,#000 40%,transparent 100%);mask-image:radial-gradient(ellipse 75% 70% at 45% 50%,#000 40%,transparent 100%);pointer-events:none}
+  .lyr .e,.lyr .t,.lyr .nx{text-shadow:0 0 14px rgba(4,5,11,.9),0 0 3px rgba(4,5,11,.8)}
+  .ui.song .lyr{display:block}
+  .ui.song .quote,.ui.song .mhint,.ui.song .hint{display:none}
+  .lyr .e{font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:300;font-size:clamp(20px,2.3vw,28px);line-height:1.3;color:var(--ink);text-shadow:0 0 18px rgba(191,227,255,.35);text-wrap:balance}
+  .lyr .t{font-size:14px;line-height:1.8;color:var(--pink);margin-top:6px;letter-spacing:.05em;text-wrap:balance}
+  .lyr .nx{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:15px;color:var(--faint);margin-top:14px}
+  .lyr .cur{animation:lyrin .8s ease both}
+  @keyframes lyrin{from{opacity:0;transform:translateY(8px);filter:blur(4px)}}
+  .player{display:none;align-items:center;gap:10px;font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;letter-spacing:.06em}
+  .ui.song .player{display:flex}
+  .player input{width:clamp(110px,16vw,220px);accent-color:#cfe8ff}
+  .player em{font-style:normal;color:var(--faint)}
+  .ui:not(.song) #lang{display:none}
+  .poke.music.on{border-color:var(--pink);box-shadow:0 0 22px rgba(255,190,225,.3)}
+  @media (prefers-reduced-motion:reduce){.lyr .cur{animation:none}}
   #loader{position:fixed;inset:0;display:grid;place-items:center;background:#04050b;z-index:10;transition:opacity 1.2s ease;
     font-size:13px;letter-spacing:.4em;color:var(--dim)}
   #loader.done{opacity:0;pointer-events:none}
@@ -71,7 +82,6 @@
   @media (max-width:760px){
     .brand{top:20px;left:20px}
     .tag{display:none}
-    .lang{top:16px;right:18px}
     .hero{top:15%;transform:none;left:22px;right:22px}
     .hero h1{font-size:72px}
     .hero .en{font-size:18px;margin:8px 0 14px}
@@ -84,6 +94,9 @@
     .hint{display:none}
     .controls{left:20px;right:20px;bottom:24px}
     .hint .desk{display:none}
+    .ui.song #compare,.ui.song .readout{display:none}
+    .lyr{min-height:9.5em;margin:-10px -22px -6px;padding:24px 22px 22px}
+    .lyr .e{font-size:20px}
   }
 </style>
 <script type="importmap">
@@ -95,7 +108,8 @@
 </head>
 <body>
 <div id="stage"></div>
-<div id="loader" data-i18n="loader">正在對焦</div>
+<audio id="au" src="song.mp3" preload="metadata"></audio>
+<div id="loader">正在對焦</div>
 
 <div class="ui" id="ui">
   <div class="brand">
@@ -105,29 +119,32 @@
     </svg>
     <div><b>CHAN</b> · 璨</div>
   </div>
-  <button class="lang" id="lang">日本語</button>
-  <div class="tag" data-i18n="tag">星球聯動<br>KIRAKIRA CLASS · 鑽石行星</div>
+  <div class="tag">星球聯動<br>KIRAKIRA CLASS · 鑽石行星</div>
 
   <div class="hero">
     <div class="kicker">A DIAMOND WORLD</div>
     <h1>璨</h1>
     <div class="en">He knows he is beautiful.</div>
     <p class="quote" id="quote">「別一直盯著瞧呀，知道我長得好看，但眼睛要看花了！」<small>璨，對第一次靠近的探索船</small></p>
-    <p class="mhint" data-i18n="mhint">點星球、點冰晶環、連戳很多下、放著不管，他都會有反應</p>
+    <div class="lyr" id="lyr" aria-live="polite"></div>
+    <p class="mhint">點星球、點冰晶環、連戳很多下、放著不管，他都會有反應</p>
   </div>
 
   <div class="readout">
-    <div class="extra"><span data-i18n="r1" style="color:inherit">折射率</span> <span>2.42</span><br>
-    <span data-i18n="r2" style="color:inherit">自轉週期</span> <span id="spin">— —</span><br>
-    <span data-i18n="r3" style="color:inherit">可居住指數</span> <span data-i18n="r3v">他說了算</span></div>
-    <span data-i18n="r4" style="color:inherit">目前心情</span> <span class="mood" id="mood">自我欣賞中</span>
+    <div class="extra">折射率 <span>2.42</span><br>
+    自轉週期 <span id="spin">— —</span><br>
+    可居住指數 <span>他說了算</span></div>
+    目前心情 <span class="mood" id="mood">自我欣賞中</span>
   </div>
 
   <div class="controls">
-    <button class="poke" id="poke" data-i18n="poke">戳他一下</button>
-    <button class="poke" id="compare" data-i18n="compare">找別顆比較</button>
-    <button class="poke moon" id="night" title="深夜模式" data-i18n="night">夜</button>
-    <div class="hint"><span class="desk" data-i18n="desk">點星球、點冰晶環、雙擊戳他、放著不管也有反應<br>拖曳旋轉　滾輪靠近　<kbd>H</kbd> 隱藏介面　<kbd>F</kbd> 全螢幕</span></div>
+    <button class="poke" id="poke">戳他一下</button>
+    <button class="poke" id="compare">找別顆比較</button>
+    <button class="poke moon" id="night" title="深夜模式">夜</button>
+    <button class="poke music" id="music">♪ 主題曲</button>
+    <button class="poke" id="lang">中英</button>
+    <div class="player"><span id="lt0">00:00</span><input type="range" id="lseek" min="0" max="1000" value="0" aria-label="歌曲進度"><span id="lt1">00:00</span><em id="ldemo"></em></div>
+    <div class="hint"><span class="desk">點星球、點冰晶環、雙擊戳他、放著不管也有反應<br>拖曳旋轉　滾輪靠近　<kbd>H</kbd> 隱藏介面　<kbd>F</kbd> 全螢幕</span></div>
   </div>
 </div>
 
@@ -138,7 +155,6 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const isMobile = matchMedia('(pointer:coarse)').matches || innerWidth < 760;
@@ -156,7 +172,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'hi
 renderer.setPixelRatio(Q.dpr);
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 0.92;
 document.getElementById('stage').appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -257,7 +273,7 @@ const gemMat = new THREE.MeshPhysicalMaterial({
   attenuationColor: new THREE.Color(0xd6ecff), attenuationDistance: 5,
   iridescence: 0.6, iridescenceIOR: 1.55, iridescenceThicknessRange: [180, 820],
   clearcoat: 1, clearcoatRoughness: 0.01, specularIntensity: 1,
-  envMapIntensity: 1.6, flatShading: true
+  envMapIntensity: 1.15, flatShading: true
 });
 const gem = new THREE.Mesh(geo, gemMat);
 planet.add(gem);
@@ -288,7 +304,7 @@ const glintVS = `
     float spec = pow(max(dot(n,h),0.0), 70.0);
     float tw = pow(0.5 + 0.5*sin(uTime*(1.2+aRnd*3.4) + aRnd*61.0), 14.0);
     float facing = smoothstep(0.0, 0.25, dot(n,v));
-    vA = facing * min(spec*1.6*uSpec + tw*(0.22 + 0.3*uBoost), 1.1);
+    vA = facing * min(spec*1.2*uSpec + tw*(0.18 + 0.25*uBoost), 0.85);
     vR = aRnd;
     gl_PointSize = uSize * (0.35 + vA) * (300.0 / -mv.z);
     gl_Position = projectionMatrix * mv;
@@ -414,10 +430,10 @@ for (const [a, b, o] of [[2.22, 2.24, 0.16], [3.68, 3.69, 0.1], [2.98, 2.985, 0.
   g.setAttribute('aRnd', new THREE.Float32BufferAttribute(rnd, 1));
   var skyMat = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    uniforms: { uTime: { value: 0 }, uTex: { value: STAR } },
-    vertexShader: `attribute float aRnd; uniform float uTime; varying float vA; varying float vR;
+    uniforms: { uTime: { value: 0 }, uTex: { value: STAR }, uFade: { value: 0 } },
+    vertexShader: `attribute float aRnd; uniform float uTime, uFade; varying float vA; varying float vR;
       void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0);
-        vA = (0.35+0.65*aRnd) * (0.6+0.4*sin(uTime*(0.4+aRnd)+aRnd*90.0)); vR = aRnd;
+        vA = (0.35+0.65*aRnd) * (0.6+0.4*sin(uTime*(0.4+aRnd)+aRnd*90.0)) * smoothstep(uFade, uFade+0.04, aRnd); vR = aRnd;
         gl_PointSize = (aRnd > 0.985 ? 5.0 : 1.2 + aRnd*1.8);
         gl_Position = projectionMatrix*mv; }`,
     fragmentShader: `uniform sampler2D uTex; varying float vA; varying float vR;
@@ -442,15 +458,6 @@ addEventListener('pointermove', e => {
 const composer = new EffectComposer(renderer);
 composer.setPixelRatio(Q.dpr);
 composer.addPass(new RenderPass(scene, camera));
-// guard: a single NaN or blown-out pixel would otherwise bloom into a bright square
-composer.addPass(new ShaderPass({
-  uniforms: { tDiffuse: { value: null } },
-  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-  fragmentShader: `uniform sampler2D tDiffuse; varying vec2 vUv;
-    void main(){ vec4 c = texture2D(tDiffuse, vUv);
-      if (any(isnan(c)) || any(isinf(c))) c = vec4(0.0, 0.0, 0.0, 1.0);
-      gl_FragColor = vec4(min(c.rgb, vec3(4.0)), c.a); }`
-}));
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth * Q.bloomScale, innerHeight * Q.bloomScale), 0.5, 0.5, 0.88);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
@@ -481,7 +488,8 @@ rock.position.set(3.9, 1.5, -1.2); rock.scale.setScalar(0.001);
 world.add(rock);
 
 /* ---------- moods ---------- */
-const LINES_ZH = {
+const LINES = {
+  song: ['「……你也是來看我的吧？」'],
   calm: [
     '「別一直盯著瞧呀，知道我長得好看，但眼睛要看花了！」',
     '「想停靠先乖乖排隊。後面排著隊想來看我的小飛船可多著呢，不許插隊！」',
@@ -539,98 +547,7 @@ const LINES_ZH = {
     '「今天辛苦啦。……這句話很珍貴的，我只悄悄說一次喔。」'
   ]
 };
-const LINES_JA = {
-  calm: [
-    '「そんなにじっと見ないでよ。僕がきれいなのは知ってるけど、目がチカチカしちゃうでしょ！」',
-    '「停泊したいなら、ちゃんと並んでね。僕を見に来たい宇宙船は後ろにいっぱい並んでるんだから、割り込み禁止！」',
-    '「星の光が左から当たるときが一番きれいなの。角度、ちゃんと覚えた？間違えたら許さないからね。」',
-    '「君の船、ちょっとボロいね。近くに停まったら僕と比べられちゃうよ……でも、もうちょっとだけなら近づいてもいいけど。」',
-    '「居住適性？今日の僕の機嫌がよければ、君がどこに降りたって僕が面倒見てあげる！」'
-  ],
-  shy: [
-    '「……ひゃっ！今、こっそりつついたでしょ？」',
-    '「見る目がある君に免じて、特別にあと二回だけ見せてあげる。二回だけだからね！」',
-    '「僕が熱くなって光ってるのは君のせい？この輝きは生まれつきなの、自惚れないで！」',
-    '「ち、近いってば！氷晶の環は鋭いんだから、君の船が壊れても知らないからね。」',
-    '「ふん、宇宙で一番きれいなのは僕。やっと自分の目で確かめられたでしょ？」'
-  ],
-  proud: [
-    '「ゆっくり見て、じっくり見て。どうせ君は目を離せないって、僕わかってるんだから！」',
-    '「そう！この角度！僕もこの面が一番キラキラしてると思う。君、見る目あるね！」',
-    '「さっき氷晶がぶつかってうるさくて、聞こえなかった。もう一回褒めて、聞きたいの！」',
-    '「センスいいじゃん！特別に、軌道にもう一周期いてもいいよ。うれしいでしょ？」',
-    '「この星の軌道で、この面を見せたのは君だけ。ほかの星なんか見ちゃだめだからね。」'
-  ],
-  sulk: [
-    '「誰が君を待ってるって？自惚れないで。たまたまここで休眠してただけ。」',
-    '「ほかの星でも見に行けば？君がいなくたって、僕は……全然平気だし。」',
-    '「……ふん。かまってよ。」',
-    '「背景の星くず、もう三千個まで数えちゃったよ。君、まだ戻ってこないの……」',
-    '「消灯！今日は早じまい、もう見せてあげない。」'
-  ],
-  mirror: [
-    '「ふふん、今日のこの光の輪も完璧。文句なし！」',
-    '「待ってってば、この切子面の屈折、まだ見足りないの！」',
-    '「氷のかけら一枚一枚に僕が映ってる。宇宙ってやっぱり僕のことえこひいきしてるよね。」',
-    '「光が遮られるってば、ちょっと横にずれて……ねえ、ちょっとでいいの、そんなに離れないで！」',
-    '「自分の地表に立てたら、この景色、一年中見てても飽きないのに。」'
-  ],
-  angry: [
-    '「あんな灰色のボロ石と僕を比べるの？目が壊れてるんじゃない！もう、ムカつく！」',
-    '「反射もできない真っ黒な石だよ？なんで僕と並べて見るわけ？」',
-    '「もう一回あいつを見たら、引力で君の航路を銀河の端まで飛ばしちゃうからね！」',
-    '「あいつの隣に、まるまる十分も停まってたでしょ？正直に白状して！」',
-    '「じゃあ、あのボロ石に住めばいいじゃん！夜中に光って君とおしゃべりしてくれるか見てみなよ、ふん！」'
-  ],
-  freeze: [
-    '「……今のはノーカン、やり直し！もう一回つついて！」',
-    '「ぼ、僕はコアの演算がちょっと遅れただけ。フリーズなんかしてない！」',
-    '「つつくの速すぎ！自転軸も屈折面も、ぜんぶごちゃごちゃになっちゃったじゃん！」',
-    '「あれ？待って、今どの周期まで回ってたっけ？」',
-    '「笑うな！聞こえた？絶対に笑っちゃだめ！」'
-  ],
-  night: [
-    '「まだ寝ないの？……じゃあ、もう少しだけ光っててあげる。ちょっとだけ付き合ってあげるね。」',
-    '「夜になると引力場がすごく静かになるの。君……もうちょっとだけ近くに停まってもいいよ。」',
-    '「眠れないなら、僕の切子面を数えて。ちょうど八十面、数え終わったらちゃんと目を閉じるんだよ。」',
-    '「ずっと小さく光ってるから、暗いのは怖くないよ。明日目を開けたら、すぐに僕が見えるからね。」',
-    '「今日もお疲れさま。……この言葉は貴重なんだから、こっそり一回しか言わないよ。」'
-  ]
-};
-const LINES = { zh: LINES_ZH, ja: LINES_JA };
-const FIXED = {
-  zh: { dots: '「……」', sulkBack: '「剛才暗下來是在省電！才沒有在偷等你，跟你一點關係都沒有！」' },
-  ja: { dots: '「……」', sulkBack: '「さっき暗くなったのは省エネ！君を待ってたわけじゃないし、君とは全然関係ないから！」' }
-};
-const CAP = {
-  zh: { first: '璨，對第一次靠近的探索船', calm: '璨，對靠近的探索船', night: '璨，深夜', shy: '璨，整顆星球亮了一圈',
-        proud: '璨，放慢自轉讓你看清楚', sulk: '璨，背過身去', mirror: '璨，看著冰晶裡的自己', angry: '璨，邊緣長出了尖刺',
-        freeze: '璨，一動也不動', freezeAfter: '璨，假裝什麼都沒發生', sulkBack: '璨，馬上亮了回來' },
-  ja: { first: '璨、はじめて近づいてきた探査船に', calm: '璨、近づいてきた探査船に', night: '璨、深夜', shy: '璨、星ごとぽっと光った',
-        proud: '璨、自転をゆるめて見せびらかす', sulk: '璨、そっぽを向いた', mirror: '璨、氷晶に映る自分に見とれて', angry: '璨、切子面からトゲが生えた',
-        freeze: '璨、ぴたりと止まった', freezeAfter: '璨、何事もなかったふり', sulkBack: '璨、すぐに光り直した' }
-};
-const LABEL = {
-  zh: { calm: '自我欣賞中', night: '安靜發光中', shy: '才、才沒有害羞', proud: '得意忘形中', sulk: '鬧彆扭中',
-        mirror: '照鏡子中，勿擾', angry: '非常不爽', freeze: '當機中' },
-  ja: { calm: '自分に見とれ中', night: '静かに発光中', shy: 'て、照れてないし', proud: '得意絶頂', sulk: 'すねてる',
-        mirror: '鏡に夢中、話しかけないで', angry: 'めちゃくちゃ不機嫌', freeze: 'フリーズ中' }
-};
-const UI = {
-  zh: { loader: '正在對焦', tag: '星球聯動<br>KIRAKIRA CLASS · 鑽石行星',
-        mhint: '點星球、點冰晶環、連戳很多下、放著不管，他都會有反應',
-        r1: '折射率', r2: '自轉週期', r3: '可居住指數', r3v: '他說了算', r4: '目前心情',
-        poke: '戳他一下', compare: '找別顆比較', night: '夜', nightTitle: '深夜模式',
-        desk: '點星球、點冰晶環、雙擊戳他、放著不管也有反應<br>拖曳旋轉　滾輪靠近　<kbd>H</kbd> 隱藏介面　<kbd>F</kbd> 全螢幕',
-        stopped: '停住了', hours: ' 小時' },
-  ja: { loader: 'ピントを合わせています', tag: '惑星コラボ<br>KIRAKIRA CLASS · ダイヤモンド惑星',
-        mhint: '星や氷晶の環をタップしたり、何度もつついたり、放っておいたり。どれにも反応するよ',
-        r1: '屈折率', r2: '自転周期', r3: '居住適性', r3v: '彼の気分しだい', r4: 'いまの気分',
-        poke: 'つついてみる', compare: 'ほかの星と比べる', night: '夜', nightTitle: '深夜モード',
-        desk: '星をクリック、氷晶の環をクリック、ダブルクリックでつつく、放っておいても反応あり<br>ドラッグで回転　ホイールでズーム　<kbd>H</kbd> UIを隠す　<kbd>F</kbd> 全画面',
-        stopped: '停止中', hours: ' 時間' }
-};
-const BASE = { spin: .12, glint: .6, spec: 1, halo: .26, haloSize: 7.5, bloom: .5, expo: 1.05, lift: 0, spread: 0,
+const BASE = { spin: .12, glint: .45, spec: .72, halo: .22, haloSize: 7.5, bloom: .36, expo: .92, lift: 0, spread: 0,
   ringSpd: 1, align: 0, tightR: 0, flat: 0, spikes: 0, bands: 0, time: 1, sink: 0, tint: 0, orbit: .35, wobble: 0,
   core: 0x2a3c5e, haloC: 0x9cc4ff, att: 0xd6ecff, tintC: 0xffffff, bandC: 0xffd3ea };
 const S = {
@@ -653,6 +570,9 @@ const S = {
   angry:  { label: '非常不爽', color: '#9fd0ff', cap: '璨，邊緣長出了尖刺', rate: 4, dur: 5400,
             p: { spin: .5, glint: 1.4, spikes: 1, ringSpd: 4.2, spread: .45, lift: .22, bloom: .62, halo: .34, orbit: 1, wobble: .5,
                  core: 0x1e4f9a, haloC: 0x6fb0ff, att: 0xbfe0ff, tintC: 0x9fd0ff, tint: .7 } },
+  song:   { label: '唱歌給你聽', color: '#ffc6e0', cap: '璨，為你唱歌', rate: 1.1,
+            p: { spin: .06, orbit: .16, glint: .5, spec: .5, halo: .24, haloSize: 8.8, bloom: .34, expo: .8, ringSpd: .55, lift: .06, bands: .2,
+                 haloC: 0xb8d0ff, tintC: 0xffd6ec, tint: .35, bandC: 0xffd6ec } },
   freeze: { label: '當機中', color: '#d0d0d0', cap: '璨，一動也不動', rate: 1.3, dur: 2600,
             p: { time: 0, sink: 1, glint: .9, orbit: 0 } }
 };
@@ -666,63 +586,37 @@ const TC = {}; for (const k of COLS) TC[k] = new THREE.Color(BASE[k]);
 const quoteEl = document.getElementById('quote'), moodEl = document.getElementById('mood');
 const nightBtn = document.getElementById('night');
 const lastLine = {};
-// a quote is remembered as {s: state, i: index} or {f: fixedKey}, so switching language re-renders the same line
 function pick(name) {
-  const L = LINES.zh[name]; let i;
+  const L = LINES[name]; let i;
   do { i = Math.floor(Math.random() * L.length); } while (L.length > 1 && i === lastLine[name]);
-  lastLine[name] = i; return { s: name, i };
+  lastLine[name] = i; return L[i];
 }
-let cur = { q: { s: 'calm', i: 0 }, cap: 'first' };
-const qText = q => q.f ? FIXED[lang][q.f] : LINES[lang][q.s][q.i];
-function renderQuote() { quoteEl.innerHTML = qText(cur.q) + '<small>' + CAP[lang][cur.cap] + '</small>'; }
 function setQuote(q, cap) {
-  cur = { q, cap };
   quoteEl.classList.add('swap');
-  setTimeout(() => { renderQuote(); quoteEl.classList.remove('swap'); }, 380);
+  setTimeout(() => { quoteEl.innerHTML = q + '<small>' + cap + '</small>'; quoteEl.classList.remove('swap'); }, 380);
 }
-
-let booted = false;
-let lang = (() => {
-  try { const v = localStorage.getItem('can-lang'); if (v === 'zh' || v === 'ja') return v; } catch (_) {}
-  return /^ja/i.test(navigator.language || '') ? 'ja' : 'zh';
-})();
-const langBtn = document.getElementById('lang');
-function applyLang() {
-  document.documentElement.lang = lang === 'ja' ? 'ja' : 'zh-Hant';
-  document.querySelectorAll('[data-i18n]').forEach(el => { const v = UI[lang][el.dataset.i18n]; if (v != null) el.innerHTML = v; });
-  nightBtn.title = UI[lang].nightTitle;
-  langBtn.textContent = lang === 'ja' ? '中文' : '日本語';
-  if (booted) { moodEl.textContent = LABEL[lang][state]; renderQuote(); }
-}
-langBtn.addEventListener('click', () => {
-  lang = lang === 'ja' ? 'zh' : 'ja';
-  try { localStorage.setItem('can-lang', lang); } catch (_) {}
-  quoteEl.classList.add('swap');
-  setTimeout(() => { applyLang(); quoteEl.classList.remove('swap'); }, 300);
-});
-applyLang();
 
 let nightMode = (() => { const h = new Date().getHours(); return h >= 23 || h < 5; })();
 nightBtn.classList.toggle('on', nightMode);
-const restState = () => nightMode ? 'night' : 'calm';
+let songOn = false;
+const restState = () => songOn ? 'song' : (nightMode ? 'night' : 'calm');
 let state = 'calm', T = target('calm'), rate = 1.6, stateTimer = null, lineTimer = null, snapUntil = 0;
 
 function enter(name, quote, cap) {
   state = name; T = target(name); rate = S[name].rate;
   for (const k of COLS) TC[k].set(T[k]);
-  setQuote(quote ?? pick(name), cap ?? name);
-  moodEl.textContent = LABEL[lang][name]; moodEl.style.color = S[name].color;
+  setQuote(quote ?? pick(name), cap ?? S[name].cap);
+  moodEl.textContent = S[name].label; moodEl.style.color = S[name].color;
   clearTimeout(stateTimer); clearInterval(lineTimer);
   if (name === 'freeze') {
-    stateTimer = setTimeout(() => { snapUntil = performance.now() + 700; enter(restState(), pick('freeze'), 'freezeAfter'); }, S.freeze.dur);
+    stateTimer = setTimeout(() => { snapUntil = performance.now() + 700; enter(restState(), pick('freeze'), '璨，假裝什麼都沒發生'); }, S.freeze.dur);
   } else if (S[name].dur) {
     stateTimer = setTimeout(() => enter(restState()), S[name].dur);
   } else if (name === 'calm' || name === 'night') {
-    lineTimer = setInterval(() => setQuote(pick(state), state), 12000);
+    lineTimer = setInterval(() => setQuote(pick(state), S[state].cap), 12000);
   }
 }
-enter(restState(), nightMode ? undefined : { s: 'calm', i: 0 }, nightMode ? undefined : 'first');
-booted = true;
+enter(restState(), nightMode ? undefined : LINES.calm[0], '璨，對第一次靠近的探索船');
 const resting = () => state === 'calm' || state === 'night';
 
 // poking: a single poke flusters him, too many in a row and he freezes
@@ -731,7 +625,7 @@ function poke() {
   const now = performance.now();
   pokes = pokes.filter(t => now - t < 3500); pokes.push(now);
   if (state === 'freeze') return;
-  if (pokes.length >= 4) { pokes = []; enter('freeze', { f: 'dots' }); return; }
+  if (pokes.length >= 4) { pokes = []; enter('freeze', '「……」'); return; }
   enter('shy');
 }
 document.getElementById('poke').addEventListener('click', () => { wake(); poke(); });
@@ -745,7 +639,7 @@ nightBtn.addEventListener('click', () => {
 let lastActive = performance.now();
 function wake() {
   lastActive = performance.now();
-  if (state === 'sulk') enter(restState(), { f: 'sulkBack' }, 'sulkBack');
+  if (state === 'sulk') enter(restState(), '「剛才暗下來是在省電！才沒有在偷等你，跟你一點關係都沒有！」', '璨，馬上亮了回來');
 }
 for (const ev of ['pointerdown', 'pointermove', 'wheel', 'keydown', 'touchstart']) addEventListener(ev, wake, { passive: true });
 
@@ -792,6 +686,104 @@ addEventListener('resize', () => {
   bloom.setSize(innerWidth * Q.bloomScale, innerHeight * Q.bloomScale);
 });
 
+
+/* ---------- theme song: When the Stars Go Out ---------- */
+const LRC = `[00:17.50]Seven billion years I waited in the dark,
+[00:23.84]practicing my softest smile on the ice.
+[00:30.00]The dim star rose and fell a billion times,
+[00:36.36]and no one ever looked at me twice.
+[00:42.70]Then you came drifting in so slow,
+[00:49.08]a little light across my sky.
+[00:55.40]You looked at me eleven minutes long,
+[00:59.40]and I forgot how to say goodbye.
+[01:05.82]When the stars go out like candles, one by one,
+[01:12.24]and the sky comes drifting down like snow,
+[01:18.20]I'll hold you till there's nothing left of us but light,
+[01:24.42]and I'll never be alone, no, never be alone.
+[01:31.82]Lie with me, lie with me, in the flowers from your home,
+[01:39.06]at the end of everything, I'm finally not alone.
+[01:52.04]Your skin is turning cold and clear,
+[01:58.14]like morning light on frozen glass.
+[02:03.62]Don't be afraid, love, it's only me,
+[02:10.74]I'm learning how to make you last.
+[02:15.42]Every laugh you left is sleeping in a jellyfish of light,
+[02:21.30]every breath, every word, every sigh,
+[02:28.82]and when the universe forgets our names,
+[02:34.84]I'll still remember you and I.
+[02:39.94]When the stars go out like candles, one by one,
+[02:46.26]and the sky comes drifting down like snow,
+[02:52.18]I'll hold you till there's nothing left of us but light,
+[02:58.42]and I'll never be alone, no, never be alone.
+[03:05.84]Lie with me, lie with me, in the flowers from your home,
+[03:12.94]at the end of everything, I'm finally not alone.
+[03:19.06]Don't go back to Earth, my love,
+[03:21.88]there's nothing waiting there but rain.
+[03:25.14]Let the ship sleep, let the old stars die,
+[03:28.26]I'll be your sky, I'll say your name.
+[03:31.44]Fold into me, fold into me,
+[03:34.70]skin to crystal, heart to heart,
+[03:37.68]till there's no line where you end and I begin,
+[03:41.60]no light that ever pulls apart.
+[03:45.66]When the stars go out like candles, one by one,
+[03:51.94]and the end comes softly through the snow,
+[03:57.74]we'll turn to diamond, you and me,
+[04:03.98]and I will never let you go.
+[04:11.36]Lie with me, lie with me, now the lights are gone,
+[04:22.98]seven billion years of night, and then, you came along.
+[04:36.62]Stay.
+[04:47.80]...Just stay.`;
+const ZH = {"Seven billion years I waited in the dark,": "七十億年，我在幽暗裡靜靜守候，", "practicing my softest smile on the ice.": "對著冰面，反覆練習最柔軟的微笑。", "The dim star rose and fell a billion times,": "黯淡的遲星起落十億回，", "and no one ever looked at me twice.": "卻從未有誰，願意多看我一眼。", "Then you came drifting in so slow,": "直到你緩緩漂流而來，", "a little light across my sky.": "成為劃過我天幕的一點微光。", "You looked at me eleven minutes long,": "你凝視了我整整十一分鐘，", "and I forgot how to say goodbye.": "我便從此忘了，該如何道別。", "When the stars go out like candles, one by one,": "當繁星如燭火般逐一熄滅，", "and the sky comes drifting down like snow,": "當整片天穹化作碎雪紛飛墜落，", "I'll hold you till there's nothing left of us but light,": "我會緊緊擁著你，直到我們只剩純粹的光，", "and I'll never be alone, no, never be alone.": "而我再也不會孤單，再也不會孤單。", "Lie with me, lie with me, in the flowers from your home,": "躺在我身邊吧，躺在我身邊，在你故鄉的花叢裡，", "at the end of everything, I'm finally not alone.": "在萬物終結之處，我終於不再是一個人。", "Your skin is turning cold and clear,": "你的肌膚漸漸變得冰涼澄澈，", "like morning light on frozen glass.": "宛如晨光穿透凝霜的琉璃。", "Don't be afraid, love, it's only me,": "別怕，親愛的，那只是我，", "I'm learning how to make you last.": "我正在學著，如何留住你的永恆。", "Every laugh you left is sleeping in a jellyfish of light,": "你遺落的每聲輕笑，都沉睡在發光的水母裡，", "every breath, every word, every sigh,": "每一口呼吸，每一句低語，每一聲輕嘆，", "and when the universe forgets our names,": "當整座宇宙終於遺忘我們的名字，", "I'll still remember you and I.": "我依然會記得，你與我。", "Don't go back to Earth, my love,": "別回地球去了，我的愛，", "there's nothing waiting there but rain.": "那裡除了連綿的雨，什麼也沒在等你。", "Let the ship sleep, let the old stars die,": "讓方舟沉睡，讓古老的星辰凋零，", "I'll be your sky, I'll say your name.": "我會成為你的天空，輕喚你的名字。", "Fold into me, fold into me,": "融入我吧，徹底融入我，", "skin to crystal, heart to heart,": "肌膚化作結晶，心臟貼緊心臟，", "till there's no line where you end and I begin,": "直到再也分不清，哪裡是你的盡頭，哪裡是我的起點，", "no light that ever pulls apart.": "再也沒有任何光芒，能將我們拆散。", "and the end comes softly through the snow,": "當終點踩著碎雪輕悄降臨，", "we'll turn to diamond, you and me,": "我們會化為鑽石，你與我，", "and I will never let you go.": "而我永遠不會鬆開你的手。", "Lie with me, lie with me, now the lights are gone,": "躺在我身邊吧，躺在我身邊，此刻燈火俱滅，", "seven billion years of night, and then, you came along.": "漫長七十億年的永夜過後，你終於來了。", "Stay.": "留下來。", "...Just stay.": "……在我身邊。"}, JA = {"Seven billion years I waited in the dark,": "七十億年、僕は暗闇の中で待ち続けた、", "practicing my softest smile on the ice.": "氷の上で、いちばん柔らかな微笑みを練習しながら。", "The dim star rose and fell a billion times,": "ほの暗い星が十億回、昇っては沈んだのに、", "and no one ever looked at me twice.": "誰ひとり、僕を二度見てはくれなかった。", "Then you came drifting in so slow,": "そこへ君が、ゆっくりと漂ってきた、", "a little light across my sky.": "僕の空を横切る、小さな光になって。", "You looked at me eleven minutes long,": "君は十一分間、僕を見つめてくれた、", "and I forgot how to say goodbye.": "それだけで僕は、さよならの言い方を忘れた。", "When the stars go out like candles, one by one,": "星たちが蝋燭のように、ひとつずつ消えていくとき、", "and the sky comes drifting down like snow,": "空が雪のように、静かに降りてくるとき、", "I'll hold you till there's nothing left of us but light,": "僕は君を抱きしめる、ふたりが光だけになるまで、", "and I'll never be alone, no, never be alone.": "もう二度と、ひとりにはならない、ひとりには。", "Lie with me, lie with me, in the flowers from your home,": "そばで横になって、君の故郷の花の中で、", "at the end of everything, I'm finally not alone.": "すべての終わりで、僕はやっとひとりじゃなくなる。", "Your skin is turning cold and clear,": "君の肌が、冷たく澄んでいく、", "like morning light on frozen glass.": "凍った硝子に差す朝の光のように。", "Don't be afraid, love, it's only me,": "怖がらないで、愛しい人、僕なだけだよ、", "I'm learning how to make you last.": "君を永遠にする方法を、今覚えているところ。", "Every laugh you left is sleeping in a jellyfish of light,": "君が残した笑い声はみんな、光るクラゲの中で眠っている、", "every breath, every word, every sigh,": "ひとつひとつの吐息も、言葉も、ため息も、", "and when the universe forgets our names,": "そして宇宙が僕らの名前を忘れても、", "I'll still remember you and I.": "僕はずっと覚えている、君と僕のことを。", "Don't go back to Earth, my love,": "地球には帰らないで、僕の愛しい人、", "there's nothing waiting there but rain.": "あそこで君を待っているのは、雨だけだから。", "Let the ship sleep, let the old stars die,": "方舟は眠らせて、古い星たちは死なせて、", "I'll be your sky, I'll say your name.": "僕が君の空になる、君の名前を呼ぶから。", "Fold into me, fold into me,": "僕の中に溶けて、溶けてきて、", "skin to crystal, heart to heart,": "肌は結晶に、心臓は心臓に、", "till there's no line where you end and I begin,": "君の終わりと僕の始まりの境目が、なくなるまで、", "no light that ever pulls apart.": "どんな光にも、もう引き離せないように。", "and the end comes softly through the snow,": "終わりが雪を踏んで、そっと訪れるとき、", "we'll turn to diamond, you and me,": "僕らはダイヤモンドになる、君と僕で、", "and I will never let you go.": "そして僕は、もう二度と君を離さない。", "Lie with me, lie with me, now the lights are gone,": "そばで横になって、もう灯りはすべて消えた、", "seven billion years of night, and then, you came along.": "七十億年の夜のあとで、君が来てくれた。", "Stay.": "ここにいて。", "...Just stay.": "……ここにいて。"};
+const SL = [];
+LRC.split('\n').forEach(l => { const m = [...l.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)]; const tx = l.replace(/\[[^\]]*\]/g, '').trim(); m.forEach(x => SL.push({ t: +x[1] * 60 + +x[2], e: tx })); });
+SL.sort((a, b) => a.t - b.t);
+const au = document.getElementById('au'), musicBtn = document.getElementById('music'), langBtn = document.getElementById('lang');
+const lyrEl = document.getElementById('lyr'), lseek = document.getElementById('lseek');
+let demo = false, dpos = 0, dt0 = 0, dplay = false, lyrIdx = -2, starFade = 0;
+const DEMO_LEN = (SL.length ? SL[SL.length - 1].t : 240) + 2;
+au.addEventListener('error', () => { demo = true; document.getElementById('ldemo').textContent = '預覽・尚未放入音檔'; });
+const sDur = () => demo ? DEMO_LEN : (au.duration || DEMO_LEN);
+const sNow = () => demo ? (dplay ? dpos + (performance.now() - dt0) / 1000 : dpos) : au.currentTime;
+const sPlaying = () => demo ? dplay : !au.paused;
+function sPlay() { if (demo) { if (!dplay) { dt0 = performance.now(); dplay = true; } } else au.play().catch(() => { demo = true; document.getElementById('ldemo').textContent = '預覽・尚未放入音檔'; sPlay(); }); }
+function sPause() { if (demo) { dpos = sNow(); dplay = false; } else au.pause(); }
+function sSeek(t) { if (demo) { dpos = t; dt0 = performance.now(); } else au.currentTime = t; }
+const fmt = s => { s = Math.max(0, s | 0); return String(s / 60 | 0).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+const LANGS = [['zh', '中英'], ['ja', '英日'], ['en', 'EN']]; let li = 0;
+langBtn.addEventListener('click', () => { wake(); li = (li + 1) % LANGS.length; langBtn.textContent = LANGS[li][1]; lyrIdx = -2; });
+const escH = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+function renderLyr(i) {
+  const c = SL[i], n = SL[i + 1], L = LANGS[li][0];
+  const tr = c && c.e ? (L === 'zh' ? ZH[c.e] : L === 'ja' ? JA[c.e] : '') : '';
+  lyrEl.innerHTML = (c && c.e ? `<div class="cur"><div class="e">${escH(c.e)}</div>${tr ? `<div class="t">${escH(tr)}</div>` : ''}</div>`
+    : `<div class="cur"><div class="e" style="opacity:.45">· · ·</div></div>`) + (n && n.e ? `<div class="nx">${escH(n.e)}</div>` : '');
+}
+function songStart() { songOn = true; ui.classList.add('song'); musicBtn.classList.add('on'); lyrIdx = -2; if (state !== 'freeze') enter('song'); }
+function songEnd() { songOn = false; sPause(); sSeek(0); ui.classList.remove('song'); musicBtn.classList.remove('on'); musicBtn.textContent = '♪ 主題曲'; enter(restState()); }
+musicBtn.addEventListener('click', () => {
+  wake();
+  if (!songOn) { songStart(); sPlay(); musicBtn.textContent = '❚❚ 暫停'; }
+  else if (sPlaying()) { sPause(); musicBtn.textContent = '▶ 繼續'; }
+  else { sPlay(); musicBtn.textContent = '❚❚ 暫停'; }
+});
+au.addEventListener('ended', songEnd);
+lseek.addEventListener('input', () => { sSeek(lseek.value / 1000 * sDur()); lyrIdx = -2; });
+function songTick(dt) {
+  let target = 0;
+  if (songOn) {
+    const t = sNow(), D = sDur();
+    if (demo && dplay && t >= DEMO_LEN) { songEnd(); return; }
+    let i = -1; for (let k = 0; k < SL.length; k++) { if (SL[k].t <= t + 0.05) i = k; else break; }
+    if (i !== lyrIdx) { lyrIdx = i; renderLyr(i); }
+    document.getElementById('lt0').textContent = fmt(t); document.getElementById('lt1').textContent = fmt(D);
+    if (document.activeElement !== lseek) lseek.value = Math.round(Math.min(1, t / D) * 1000);
+    // the stars go out one by one through the last part of the song
+    target = Math.max(0, Math.min(0.96, (t / D - 0.45) / 0.42));
+    lastActive = performance.now();
+  }
+  starFade += (target - starFade) * (1 - Math.exp(-dt * 0.8));
+  skyMat.uniforms.uFade.value = starFade;
+}
+
 /* ---------- loop ---------- */
 const clock = new THREE.Clock();
 const dummy = new THREE.Object3D(), qs = new THREE.Quaternion(), qf = new THREE.Quaternion();
@@ -827,7 +819,7 @@ function tick() {
   innerFacets.rotation.y -= dt * 0.2 * P.time; innerFacets.rotation.x += dt * 0.07 * P.time;
   core.rotation.y += dt * 0.3 * P.time;
   planet.scale.setScalar(1 + Math.sin(t * 9) * 0.015 * P.wobble);
-  spinEl.textContent = spin < 0.01 ? UI[lang].stopped : (2 * Math.PI / spin / 60 * 24).toFixed(1) + UI[lang].hours;
+  spinEl.textContent = spin < 0.01 ? '停住了' : (2 * Math.PI / spin / 60 * 24).toFixed(1) + ' 小時';
 
   coreMat.color.copy(PC.core);
   halo.material.color.copy(PC.haloC);
@@ -902,6 +894,7 @@ function tick() {
   gu.uMood.value = P.tint; gu.uTint.value.copy(PC.tintC);
   dustMat.uniforms.uTime.value = simT; dustMat.uniforms.uMood.value = P.tint; dustMat.uniforms.uTint.value.copy(PC.tintC);
   skyMat.uniforms.uTime.value = t;
+  songTick(dt);
 
   composer.render();
   if (first) { first = false; document.getElementById('loader').classList.add('done'); }
@@ -913,7 +906,7 @@ tick();
   // if WebGL or the 3D library cannot load, say so instead of leaving a black screen
   setTimeout(() => {
     const l = document.getElementById('loader');
-    if (l && !l.classList.contains('done')) l.textContent = document.documentElement.lang === 'ja' ? 'この端末では3D画面を読み込めないみたい。別のブラウザで試してみてね' : '這台裝置好像載入不了 3D 畫面，換個瀏覽器試試看';
+    if (l && !l.classList.contains('done')) l.textContent = '這台裝置好像載入不了 3D 畫面，換個瀏覽器試試看';
   }, 12000);
 </script>
 </body>
